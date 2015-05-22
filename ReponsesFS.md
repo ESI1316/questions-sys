@@ -73,7 +73,48 @@ Inconvénients de la FAT :
 
 Voir les questions secondaires FAT.
 
-#### Décrivez la structure d'une partition formatée en EXT2
+#### Décrivez la structure d'une partition formatée en EXT/EXT2
+
+EXT : 
+
+En EXT, un mini-disque (une partition) est composée de quatres zones : 
+
+* Boot Area : Contient les informations sur le démarrage
+* Super-bloc : Contient les informations sur le mini-disque
+* Tableau d'inodes : contient les inodes (métadonnées des fichiers)
+* Tableau de blocs : contient les blocs (les données)
+
+```
+ -------------------------------------------------
+ | BA | SB | Tableau d'inodes | Tableau de blocs |
+ -------------------------------------------------
+```
+
+Un fichier contient une inode. Pour accéder à un fichier, il faut connaître
+l'inode, cet inode comprend : 
+
+* Nom du propriétaire
+* Droits d'accès
+* Dates
+* Taille
+* Type (fichier / dossier)
+* Liste de tous les blocs du fichiers
+
+Le chaînage est donc fait dans l'inode lui même. 
+La liste de tous les blocs contient 10 pointeurs de blocs direct, et 3 pointeurs
+avec indirection.
+
+* Le 11ème pointeur contient un seul niveau d'indirection, il
+  pointe vers un tableau de blocs qui pointe vers les blocs de données.
+
+* Le 12ème pointeur contient deux niveaux d'indirection, il pointe vers un
+  tableau de blocs qui pointent eux même sur un tableau de blocs qui pointent
+  sur les blocs de données.
+
+* Le 13ème pointeur contient trois niveaux d'indirection. il pointe vers un
+  tableau de blocs qui pointent eux même sur un tableau de blocs qui pointent
+  eux même sur un tableau de blocs qui pointent vres les blocs de données.
+
 
 #### Détaillez comment l'OS permet de découper un disque en plusieurs partitions (primaire, logique, étendue). Quelles sont les limites de cette technique ? Comment évolue-t-elle ? Quels sont les outils utilisés pour gérer ces partition (mkfs, fdisk, mount, unmount, df, /dev, ...) 
 
