@@ -90,7 +90,7 @@ En EXT, un mini-disque (une partition) est composée de quatres zones :
  -------------------------------------------------
 ```
 
-Un fichier contient une inode. Pour accéder à un fichier, il faut connaître
+Le tableau d'inode contient un inode par fichier. Pour accéder à un fichier, il faut connaître
 l'inode, cet inode comprend : 
 
 * Nom du propriétaire
