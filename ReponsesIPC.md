@@ -37,8 +37,30 @@ Note : `IPC_PRIVATE` n’est pas un flag mais une clé (`key_t`). Si cette valeu
 int semctl(int semid, int semnum, int cmd, ...);
 ```
 
+
+
+
 #### semop
 
+```C
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+
+int semop(int semid, struct sembuf *sops, unsigned nsops);
+```
+semop() performs operations on selected semaphores in the set indicated by semid. Each of the nsops elements in the array pointed to by sops specifies an operation to be performed on a single semaphore. The elements of this structure are of type struct sembuf, containing the following members: 
+
+`semop()` effectue des opérations sur les sémaphores sélectionnés du set de sémaphore identifié par `semid`. Chacun des `nsops` éléments du tableau pointé par `sops` définit une opération à effectuer sur un unique sémaphore. Les éléments de cette structure sont de type `struct sembuf`, qui contient :
+
+```C
+unsigned short sem_num;  /* semaphore number */
+short          sem_op;   /* semaphore operation */
+short          sem_flg;  /* operation flags */
+```
+
+L’ensemble des opérations contenues dans `sops` est exécutée dans l’ordre du tableau et sont atomiques, ce qui implique que toutes les opérations sont exécutées comme une unité, ou aucune.
+Cet appel est donc différent d’appeler 2 fois `down()` ou `up()`, ceux-ci ne travaillant que sur le premier sémaphore du set, et n’étant pas atomiques.
 
 \newpage
 
