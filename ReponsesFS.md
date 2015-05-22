@@ -12,8 +12,8 @@ Le schéma ci-dessous représente une partition formatée en F.A.T
  ----------------------------------------------
 ```
 
-BA = Boot Area
-FAT = Index
+* BA = Boot Area
+* FAT = Index
 
 Le tableau de clusters est constitué de clusters de même taille. Un cluster ne
 peut contenir qu'un seul fichier.
@@ -101,7 +101,13 @@ de changer le chainage en fat si on utilise de nouveaux clusters.
 #### (FAT) Détaillez les situations d'incohérence et montrer comment l'OS récupère cette situation.
 
 Lors d'un arrêt brutal du système, la FAT peut comporter des erreurs par rapport
-au contenu des clusters.
+au contenu des clusters. Le système analyse le disque : 
+
+* Si la suite d'un fichier est un cluster vide, on remplace l'adresse par -1.
+* Si on trouve un cluster qui contient des données mais ne semble appartenir à
+  aucun fichier, et qu'il n'est pas libre. L'OS dépose alors le fragment de
+  fichier dans le dossier lost+found (il y crée un fichier avec l'adresse du
+  premier cluster).
 
 
 #### (EXT2) Détaillez comment l'OS retrouve un fichier, ajoute des données à ce fichier, efface ce fichier.
