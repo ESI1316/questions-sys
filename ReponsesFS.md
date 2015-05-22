@@ -118,6 +118,9 @@ avec indirection.
 
 #### Détaillez comment l'OS permet de découper un disque en plusieurs partitions (primaire, logique, étendue). Quelles sont les limites de cette technique ? Comment évolue-t-elle ? Quels sont les outils utilisés pour gérer ces partition (mkfs, fdisk, mount, unmount, df, /dev, ...) 
 
+\texttt{JE SUIS PAS TROP SUR}
+Le MBR contient une table des partitions permettant d'avoir 4 partitions.
+Les partitions logique peuvent être divisées en partitions étendues.
 
 ## Questions secondaires 
 
@@ -134,13 +137,11 @@ Exemple pour retrouver un fichier : int h = open("/home/user/f1");
 * En FAT32 : Même principe qu'en FAT16, sauf que le répertoire racine est
   retrouvé grâce au MBR.
 
-
 Supprimer un fichier : On met 0 dans la FAT aux clusters correspondant au
 fichier.
 
 Ecrire dans un fichier : Il est très simple d'écrire dans un fichier, il suffit
 de changer le chainage en fat si on utilise de nouveaux clusters.
-	
 
 #### (FAT) Détaillez les situations d'incohérence et montrer comment l'OS récupère cette situation.
 
@@ -153,8 +154,17 @@ au contenu des clusters. Le système analyse le disque :
   fichier dans le dossier lost+found (il y crée un fichier avec l'adresse du
   premier cluster).
 
-
 #### (EXT2) Détaillez comment l'OS retrouve un fichier, ajoute des données à ce fichier, efface ce fichier.
+
+handle = open("/usr/home/d", O\_RDONLY);
+
++ / (root) == inode 2 	=> Numero de bloc 	28 
++ bloc 28 => contient l'entrée "usr, inode 35"
++ usr/ == inode 35 	=> Numero de bloc 64
++ bloc 64 => contient l'entrée "home, inode 11"
++ home == inode 11 	=> Numero de bloc 77
++ bloc 77 => contient l'entrée "d, inode 45"
++ d == inode 45, l'ensemble des blocs appartiennent au fichier "d".
 
 #### (EXT2) Détaillez les situations d'incohérence et montrer comment l'OS récupère cette situation
 
