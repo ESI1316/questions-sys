@@ -168,6 +168,18 @@ au contenu des clusters. Le système analyse le disque :
 
 #### (EXT2) Détaillez la notion de fichier creux à l'aide d'un exemple (création, taille, occupation du disque)
 
+Exemple : On écrit dans un fichier "1" à la position 1 et "2" à la position 100000.
+Lors d'une lecture, le système retournera des 0 binaires, mais il ne stocke pas
+sur le disque. Les blocs qui contiennent des 0 ont l'adresse 0 dans l'inode
+(aucun bloc réservé). Dans ce cas le fichier n'occuperait que 3 blocs sur le
+disque : celui qui contient le "1", celui qui contient le "2" et le bloc pointé
+par la 11ème adresse. Alors que normalement un tel fichier devrait occuper 100
+blocs. Mais sa taille est bien de 100000 * 4 = 400000 Kb. Mais son disk usage
+est de 3.
+
+PS : On se déplace dans un fichier avec un lseek(), expliqué dans une autre
+question.
+
 #### (EXT-EXT2) Détaillez la structure d'une partition formatée en EXT et EXT2. Détaillez les avantages d'EXT2 et l'implémentation de ces avantages. Commen EXT2 a t-il évolué ensuite ?
 
 
