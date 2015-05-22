@@ -12,21 +12,24 @@ Le schéma ci-dessous représente une partition formatée en F.A.T
  ----------------------------------------------
 ```
 
-* BA = Boot Area
+* BA = Boot Area\footnote{BA == BR == Boot Record}
 * FAT = Index
 
 Le tableau de clusters est constitué de clusters de même taille. Un cluster ne
 peut contenir qu'un seul fichier.
 
-La FAT est l'index (en ram) du tableau de clusters. La FAT contient autant d'entrée que
+1 cluster == n * secteur défini\footnote{cluster == bloc}
+
+La FAT est l'index du tableau de clusters, il est chargé en RAM au démarrage
+pour des raisons de performance. La FAT contient autant d'entrée que
 de clusters présent dans le tableau de clusters. Cependant une entrée n'occupe
 pas nécessairement un cluster. La FAT contient l'adresse des clusters. Elle fait
 le lien entre les différents clusters d'un fichier.
 
 Une entrée dans la fat peut avoir plusieurs valeurs : 
 
-* 0 si le cluster est libre (ne veut pas dire que le cluster est vide,
-	  seulement qu'il est libre)
+* 0 si le cluster est libre \footnote{ne veut pas dire que le cluster est vide,
+	  seulement qu'il est libre}
 * Une valeur positive pour désigner l'adresse du cluster suivant.
 * -1 si c'est le dernier cluster.
 * -2 si le cluster est défectueux. Comment savoir si un cluster est
@@ -37,7 +40,7 @@ Une entrée dans la fat peut avoir plusieurs valeurs :
 Le répertoire racine se trouve trouve toujours au cluster 0 dans une partition
 formatée en FAT16. En FAT32, le cluster est donné par le MBR.
 
-Les répertoires en FAT sont des fichiers particuliers contenant les métadonnées
+Les \textbf{répertoires en FAT sont des fichiers} particuliers contenant les métadonnées
 des fichiers présent dans le répertoire. Pour chaque fichier, le répertoire
 possède un descripteur de 32 bytes.
 
@@ -47,12 +50,11 @@ Les champs d'un descripteur :
 * Cluster : l'adresse du premier cluster du fichier.
 * Dates : dates de modification, création, dernier accès.
 * Extension : l'extension du fichier
-* Taille : la taille du fichier.
+* Taille : la taille du fichier.\footnote{32Bits !, raison de la taille max
+  d'un fichier de $2^{32}$}
 	
-
 Un répertoire a donc toujours au moins deux descripteurs : le descripteur du
 répertoire courant et le parent (sauf la racine qui n'a pas de parent).
-
 
 Avantages de la FAT :
 
@@ -60,7 +62,8 @@ Avantages de la FAT :
 
 Inconvénients de la FAT : 
 
-* Lourd en mémoire si la partition est trop grande.
+* Lourd en mémoire si la partition est trop grande.\footnote{#bloc * taille
+  entrée FAT}
 * Si le nom est trop long, il peut être étalé sur plusieurs entrées.
 * Pas de droits d'accès.
 * Fragmentation externe, les clusters ne sont pas toujours contigus
