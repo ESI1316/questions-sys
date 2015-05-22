@@ -86,7 +86,7 @@ Pour supprimer la fonction lié un signal
 ```C
 struct sigaction action_handler;
 action.handler.sa_handler = SIG_IGN;
-sigaction(SIGNAL, action_handler, NULL);
+sigaction(SIGNAL, &action_handler, NULL);
 
 // Méthode deprecated
 signal(INTERRUP, SIG_IGN);
