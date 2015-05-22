@@ -10,6 +10,36 @@
 
 ### semget(), semctl(), semop() : Quelle est l'utilité ? Quels sont les arguments ? Quelle est la valeur de retour ? Etablissez le lien entre ces appels système et ceux vus en théorie (up() et down())
 
+#### semget
+
+```
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+
+int semget(key_t key, int nsems, int semflg);
+```
+
+L’appel système `semget()` retourne l’identifieur du set de sémaphore associé à la clé passée en paramètre (`key_t key`). Un nouveau set de `nsems` est créé si la clé a la valeur `IPC_PRIVATE` ou si aucun set de sémaphore n’est associé avec la clé et `IPC_CREAT` est spécifié dans `semflg`.
+
+Si `semflg` spécifie `IPC_CREAT` et `IPC_EXCL` et que le set de sémaphore existe, `semget()` échoue et met `EEXIST` dans `errno`.
+
+Note : `IPC_PRIVATE` n’est pas un flag mais une clé (`key_t`). Si cette valeur spéciale est utilisée, l’appel système ignore tout sauf les 9 derniers bits significatifs de `semflg` et crée un nouveau set de sémaphore. Ceci permet de s’assurer qu’un autre processus n’utilisera pas la même clé.
+
+
+#### semctl
+
+```
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+
+int semctl(int semid, int semnum, int cmd, ...);
+```
+
+#### semop
+
+
 \newpage
 
 ### ls | wc -l : Comment l'OS parvient à exécuter cette ligne de commande ? Expliquez en détail le mécanisme sous-jacent. De façon très détaillée, expliquez comment il parvient à synchroniser wc et ls afin que wc ait toujours des données à lire.
