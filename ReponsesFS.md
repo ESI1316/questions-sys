@@ -62,7 +62,7 @@ Avantages de la FAT :
 
 Inconvénients de la FAT : 
 
-* Lourd en mémoire si la partition est trop grande.\footnote{#bloc * taille
+* Lourd en mémoire si la partition est trop grande.\footnote{\#bloc * taille
   entrée FAT}
 * Si le nom est trop long, il peut être étalé sur plusieurs entrées.
 * Pas de droits d'accès.
