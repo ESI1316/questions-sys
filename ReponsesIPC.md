@@ -59,7 +59,58 @@ execl("/usr/bin/ls", "ls", NULL);
 execl("/usr/bin/wc", "wc", "-l", NULL);
 ```
 
+\newpage
+
 #### Quels appels système permettent de gérer les signaux ? Détaillez-en les paramètres et le fonctionnement. Quelles sont les limites et les défauts de ces signaux ? Quel est le rôle de la table des interruptions, de la table des processus, de l'ordonnanceur dans ces cas ?
+
+Il faut utiliser le prototype
+
+```{.C}
+sigaction(SIGNAL, nouveau_trigger, ancien_trigger);
+```
+
+Pour assigner une procédure à un signal
+
+```C
+struct sigaction action_handler;
+action.handler.sa_handler = fct;
+sigaction(SIGNAL, action_handler, NULL);
+
+// Méthode deprecated
+signal(INTERRUP, void (* fct)(int));
+
+```
+
+Pour supprimer la fonction lié un signal
+
+```C
+struct sigaction action_handler;
+action.handler.sa_handler = SIG_IGN;
+sigaction(SIGNAL, action_handler, NULL);
+
+// Méthode deprecated
+signal(INTERRUP, SIG_IGN);
+```
+
+La table des interruptions lie chaque interruption à une fonction et un bit
+d'activation. Lors d'une interruption, le tableau est scanné et le premier bit à
+1 trouvé lance la fonction associée. Il est donc impossible de lancer plusieurs
+fois la même interruption.
+
+Certaines interruption ne peuvent être changer \textbf{JSAIS PLUS QUOIII}.
+
+2 interruptions sont spécialement créées pour "l'utilisateur" car ils ne
+possèdent pas de signification.
+
++ SIGUSR1
++ SIGUSR2
+
+Pour "lancer" un signal manuellement, il faut utiliser la commande
+
+```C
+kill(PID, INTERRUP);
+```
+
 
 #### socket(), bind(), listen(), accept(), connect() : Quelle est l'utilité ? Quels sont les arguments ? Quelle est la valeur de retour ? 
 
