@@ -10,6 +10,8 @@
 
 ### semget(), semctl(), semop() : Quelle est l'utilité ? Quels sont les arguments ? Quelle est la valeur de retour ? Etablissez le lien entre ces appels système et ceux vus en théorie (up() et down())
 
+\newpage
+
 ### ls | wc -l : Comment l'OS parvient à exécuter cette ligne de commande ? Expliquez en détail le mécanisme sous-jacent. De façon très détaillée, expliquez comment il parvient à synchroniser wc et ls afin que wc ait toujours des données à lire.
 
 Lors de l'éxecution de la commande, le shell va trouver le token "|" signifiant
@@ -46,6 +48,16 @@ Après cela, par le biais du principe de "producteur consommateur", le 2ème fil
 peut lire dans le pipe jusqu'à obtention du E.O.F. que le ls aura envoyé quand
 il n'aura plus rien à écrire.
 
+Ainsi, executer les logiciels via la commande exec ne remplacera pas la table
+des handles mais seulement text data et stack.
+
+```C
+execl("/usr/bin/ls", "ls", NULL);
+```
+
+```C
+execl("/usr/bin/wc", "wc", "-l", NULL);
+```
 
 #### Quels appels système permettent de gérer les signaux ? Détaillez-en les paramètres et le fonctionnement. Quelles sont les limites et les défauts de ces signaux ? Quel est le rôle de la table des interruptions, de la table des processus, de l'ordonnanceur dans ces cas ?
 
