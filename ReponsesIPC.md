@@ -6,7 +6,7 @@
 
 ### Expliquez la réalisation d'une section critique via "variable partagée", "blocage des interruptions" et via "sémaphores de Dijkstra". Détaillez les appels système Down et Up. Comparrez ces trois approches.
 
-### Expliquez la réalisation d'une section critique via "BTS", "alternance" et via "sémaphores de Dijkstra". Détaillez les appels système Down et up. Comparez ces trois approches.
+### Expliquez la réalisation d'une section critique via "BTS", "alternance" et via "sémaphores de Deijkstra". Détaillez les appels système Down et up. Comparez ces trois approches.
 
 ### semget(), semctl(), semop() : Quelle est l'utilité ? Quels sont les arguments ? Quelle est la valeur de retour ? Etablissez le lien entre ces appels système et ceux vus en théorie (up() et down())
 
@@ -37,8 +37,10 @@ Note : `IPC_PRIVATE` n’est pas un flag mais une clé (`key_t`). Si cette valeu
 int semctl(int semid, int semnum, int cmd, ...);
 ```
 
+`semctl()` exécute l’opération spécifiée par `cmd` sur le set de sémaphore identifié par `semid`, ou sur le `semnum`e élément de ce set.
 
-
++ `IPC_SET`  : initialise les valeurs des sémaphores du set.
++ `IPC_RMID` : supprime immédiatement le set de sémaphore, réveillant tous les processus bloqués par un appel `semop` sur le set.
 
 #### semop
 
@@ -49,7 +51,6 @@ int semctl(int semid, int semnum, int cmd, ...);
 
 int semop(int semid, struct sembuf *sops, unsigned nsops);
 ```
-semop() performs operations on selected semaphores in the set indicated by semid. Each of the nsops elements in the array pointed to by sops specifies an operation to be performed on a single semaphore. The elements of this structure are of type struct sembuf, containing the following members: 
 
 `semop()` effectue des opérations sur les sémaphores sélectionnés du set de sémaphore identifié par `semid`. Chacun des `nsops` éléments du tableau pointé par `sops` définit une opération à effectuer sur un unique sémaphore. Les éléments de cette structure sont de type `struct sembuf`, qui contient :
 
