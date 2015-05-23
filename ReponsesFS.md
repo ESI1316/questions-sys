@@ -186,41 +186,39 @@ int open(const char * pathname, int flags, mode_t mode);
 int close(int fd);
 ```
 
-`open` retourne un descripteur de fichier, c'est à dire une entrée dans la table 
-des handle du process pointant vers la table des fichiers ouvert (TDFO). 
-Un descripteur de fichier reste ouvert par défaut après une fonction `exec`car
-elle n'écrase pas la table des handle du process.
+`open` retourne un descripteur de fichier, c’est-à-dire une entrée dans la table 
+des handle du process pointant vers la table des fichiers ouverts (`TDFO`). 
+Un descripteur de fichier reste ouvert par défaut après une fonction `exec` car
+elle n’écrase pas la table des handle du process.
 
-`creat` retourne également un descripteur de fichier, `open` peut également créer
-des fichiers si le flag `O_CREAT` est spécifié.
+`creat` retourne également un descripteur de fichier. `open` peut s’occuper de la création si le flag `O_CREAT` est spécifié.
 
-`close` ferme un descripteur de fichier, son entrée dans la table des handle. 
+`close` ferme un descripteur de fichier et supprime son entrée de la table des handle. 
 Si le descripteur spécifié en paramètre est le dernier descripteur correspondant 
-à un fichier ouvert dans la TDFO, alors les ressources sont libérées dans cette 
-dernière. close retourne 0 si il réussit, -1 sinon.
+à un fichier ouvert dans la `TDFO`, alors les ressources sont libérées dans cette 
+dernière. `close` retourne `0` si il réussit, `-1` sinon.
 
-`open` créé une nouvelle entrée dans la table des descripteur des fichiers ouverts
-(`TDFO`) si il n'est pas déjà ouvert, sinon il partage cette entrée. Cette entrée 
-comprend l'offset et le statut du fichier
+`open` crée une nouvelle entrée dans la table des descripteurs des fichiers ouverts
+(`TDFO`) s’il n'est pas déjà ouvert, sinon il partage cette entrée. Cette entrée 
+comprend l'offset et le statut du fichier.
 
 Flags de open : 
 
 * `O_RDONLY` : lecture seulement
 * `O_WRONLY` : écriture seulement
-* `O_CREAT` : création
-* `O_RDWR` : lecture et écriture
-* `O_APPEND` : append : Avant chaque écriture : l'offset est positionné à la fin
-  du fichier comme si on utilisait un lseek.
-* `O_TRUNC` : Le fichier est "tronqué" (le contenu est supprimé).
+* `O_CREAT`  : création
+* `O_RDWR`   : lecture et écriture
+* `O_APPEND` : offset positionné à la fin du fichier comme si on utilisait un lseek
+* `O_TRUNC`  : Le fichier est "tronqué" (le contenu est supprimé)
 
 Il est évident que pour `O_APPEND` et `O_TRUNC`, il faut un flag en écriture.
-L'effet de `O_RDONLY` | `O_TRUNC` est indéfini et varie selon les implémentations,
+L’effet de `O_RDONLY` | `O_TRUNC` est indéfini et varie selon les implémentations,
 mais a de grande chance d'être tronqué.
 
-On peut utiliser plusieurs flags en les séparants avec le séparateur de flags
-"|", le `ou binaire`.
+On peut utiliser plusieurs flags en les séparant avec le séparateur de flags
+`|`, le `ou binaire`.
 
-Dans le cas d'une création, il faut spécifier un mode. mode est ignoré si
+Dans le cas d'une création, il faut spécifier un mode. Le mode est ignoré si
 `O_CREAT` n'est pas présent. Le mode correspond aux droits du fichier une fois
 créé. 
 
@@ -230,14 +228,14 @@ créé.
 ssize_t read(int fd, void * buffer, size_t buffer_size);
 ```
 
-* `fd` correspond au descripteur de fichier retourné par open/creat, dans la
+* `fd` correspond au descripteur de fichier retourné par `open/creat`, dans la
   table des handles.
-* `buffer` correspond à la zone mémoire ou iront les données lues.
+* `buffer` correspond à la zone mémoire où iront les données lues.
 * `buffer_size` correspond au nombre d'octet qui doivent être lus à partir de
-  l'offset du fichier spécifié dans la TDFO. Si l'offset vaut \texttt{E.O.F.}, 
-  rien n'est lu et read() retourne 0.
-* read retourne le nombre de bytes lus ou 0 si la fin du fichier est atteinte.
-  L'offset du fichier est avancé par ce nombre.
+  l'offset du fichier spécifié dans la `TDFO`. Si l’offset vaut \texttt{E.O.F.}, 
+  rien n'est lu et `read()` retourne `0`.
+* `read` retourne le nombre de bytes lus ou `0` si la fin du fichier est atteinte.
+  L’offset du fichier est avancé par ce nombre.
 
 
 
@@ -246,14 +244,14 @@ ssize_t read(int fd, void * buffer, size_t buffer_size);
 ssize_t write(int fd, const void * buffer, size_t buffer_size);
 ```
 
-* `fd` correspond au descripteur retourné par open/creat.
+* `fd` correspond au descripteur retourné par `open/creat`.
 * `buffer` correspond à la zone mémoire contenant les données à écrire dans le
   fichier.
 * `buffer_size` correspond au nombre d'octet à écrire.
-* write retourne le nombre de bytes écrit dans le fichier. Ce nombre peut être
+* `write` retourne le nombre de bytes écrit dans le fichier. Ce nombre peut être
   plus petit que `buffer_size` si la place est insuffisante sur le disque dur.
-  write retourne -1 si erreur.
-* write écrit à l'offset du fichier. Cet offset est incrémenté par le nombre de
+  `write` retourne `-1` si erreur.
+* `write` écrit à l'offset du fichier. Cet offset est incrémenté par le nombre de
   bytes écrit.
 
 
@@ -264,15 +262,15 @@ off_t lseek(int fd, off_t offset, int whence);
 ```
 
 `lseek` a pour but de repositionner l'offset du fichier ouvert associé au
-descripteur de fichier fd spécifié en paramètre.
+descripteur de fichier `fd` spécifié en paramètre.
 
-* offset correspond au décalage par rapport à l'offset courant.
-* whence correspond à la position de départ du décalage.
+* `offset` correspond au décalage par rapport à l'offset courant.
+* `whence` correspond à la position de départ du décalage.
 	+ `SEEK_SET` : correspond au début du fichier.
 	+ `SEEK_CUR` : correspond à la position actuelle de l'offset.
 	+ `SEEK_END` : corresond à la fin du fichier.
 * lseek retourne la nouvelle position de l'offset par rapport au début du
-  fichier. Si il y a erreur, -1 est retourné.
+  fichier. Si il y a erreur, `-1` est retourné.
 
 ```C
 int position_actuelle = lseek(fd, 0, SEEK_CUR); // Connaitre l'offset de la TDFO
@@ -291,20 +289,20 @@ int lstat(const char * path, struct stat * buf);
 L'utilisateur doit avoir le droit d'accéder au dossier parent de ce fichier mais
 ne doit pas nécessairement avoir de droits pour ce fichier.
 
-Quelques champs utiles de la structure stat (man 2 stat pour voir la structure
+Quelques champs utiles de la structure stat (`man 2 stat` pour voir la structure
 complète).
 
 * `stat / lstat` :
-	+ path correspond au nom du fichier.
-	+ buf correspond à l'adresse d'une zone où seront stockées les informations
+	+ `path` correspond au nom du fichier.
+	+ `buf`  correspond à l'adresse d'une zone où seront stockées les informations
 	  correspondantes au fichier (adresse d'une structure stat, voir ci-dessous).
 * `fstat`
-	+ fd correspond au descripteur de fichier.
-	+ buf correspond à l'adresse d'une zone où seront stockées les informations
+	+ `fd`  correspond au descripteur de fichier.
+	+ `buf` correspond à l'adresse d'une zone où seront stockées les informations
 	  correspondantes au fichier (adresse d'une structure stat, voir
 	  ci-dessous).
 
-`lstat` est identique à stat, sauf que si le fichier est un lien soft, alors les
+`lstat` est identique à `stat`, sauf que si le fichier est un lien soft, alors les
 informations obtenues concernent ce lien. Pour `stat`, si le fichier est un lien
 soft, alors les informations obtenues concernent le fichier sur lequel ce lien
 pointe.
@@ -336,13 +334,13 @@ int dup2(int oldfd, int newfd);
 * `dup` crée une copie de oldfd et retourne le plus petit descripteur de fichier
   non utilisé comme nouveau descripteur.
 
-* `dup2` fait de newfd la copie de oldfd et ferme newfd si nécessaire.
+* `dup2` fait de `newfd` la copie de `oldfd` et ferme `newfd` si celui-ci est ouvert.
 
 Exemple : rediriger la sortie standard vers un fichier :
 
 ```C
 close(1);
-int nouveau_h = dup(h_fichier);
+int nouveau_h = dup(h_fichier, 1);
 close(h_fichier);
 ```
 
@@ -353,17 +351,16 @@ close(h_fichier);
 
 Ces deux codes ci-dessus font exactement la même chose.
 
-* Dans le cas du dup : On ferme 1 qui correspond à la sortie standard, ce qui le
+* Dans le cas du `dup` : On ferme `1` qui correspond à la sortie standard, ce qui le
   rend non utilisé. On fait ensuite un `dup(h_fichier)` qui va copier le
-  descripteur h_fichier dans l'entrée la plus petite dans la table des handle,
-  ici 1 étant donné qu'on vient de le fermer. L'entrée 1 et h_fichier pointe
-  donc vers le fichier ouvert de h_fichier dans la TDFO. On ferme ensuite
-  h_fichier car on en a plus besoin. L'entrée de la table des handle 1 pointe
-  donc vers le fichier ouvert qui correspondait à h_fichier dans la TDFO. Quand
-  on va écrire sur la sortie standard (1), on va donc écrire sur le fichier.
+  descripteur `h_fichier` dans l'entrée la plus petite dans la table des handle,
+  ici `1` étant donné qu'on vient de le fermer. L'entrée `1` et `h_fichier` pointe
+  donc vers le fichier ouvert de `h_fichier` dans la `TDFO`. On ferme ensuite
+  `h_fichier` car on en a plus besoin. L'entrée de la table des handle `1` pointe
+  donc vers le fichier ouvert qui correspondait à `h_fichier` dans la `TDFO`. Quand
+  on va écrire sur la sortie standard (`1`), on va donc écrire sur le fichier.
 
-* Dans le cas de dup2, c'est exactement la même chose, sauf qu'il ferme 1 lui
-  même.
+* Dans le cas de `dup2`, c'est exactement la même chose, sauf qu'il ferme `1` lui-même.
 
 
 #### (EXT2) Détaillez comment l'OS mémorise les liens à l'aide d'exemple (soft, hard)
