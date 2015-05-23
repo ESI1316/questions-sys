@@ -353,6 +353,19 @@ close(h_fichier);
 
 Ces deux codes ci-dessus font exactement la même chose.
 
+* Dans le cas du dup : On ferme 1 qui correspond à la sortie standard, ce qui le
+  rend non utilisé. On fait ensuite un `dup(h_fichier)` qui va copier le
+  descripteur h_fichier dans l'entrée la plus petite dans la table des handle,
+  ici 1 étant donné qu'on vient de le fermer. L'entrée 1 et h_fichier pointe
+  donc vers le fichier ouvert de h_fichier dans la TDFO. On ferme ensuite
+  h_fichier car on en a plus besoin. L'entrée de la table des handle 1 pointe
+  donc vers le fichier ouvert qui correspondait à h_fichier dans la TDFO. Quand
+  on va écrire sur la sortie standard (1), on va donc écrire sur le fichier.
+
+* Dans le cas de dup2, c'est exactement la même chose, sauf qu'il ferme 1 lui
+  même.
+
+
 #### (EXT2) Détaillez comment l'OS mémorise les liens à l'aide d'exemple (soft, hard)
 
 #### (EXT2) Détaillez la notion de fichier creux à l'aide d'un exemple (création, taille, occupation du disque)
