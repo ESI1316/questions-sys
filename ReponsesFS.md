@@ -116,7 +116,7 @@ avec indirection.
   eux même sur un tableau de blocs qui pointent vres les blocs de données.
 
 Comme en FAT, un répertoire est un fichier dont les données forment la liste des
-fichiers qu'il contient. Chaque ficier est représenté par deux champs, son nom
+fichiers qu'il contient. Chaque fichier est représenté par deux champs, son nom
 et son numéro d'inode. Le répertoire racine en EXT a toujours l'inode numéro 2.
 Les blocs défectueux ont l'inode 1.
 
