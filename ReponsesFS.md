@@ -363,6 +363,84 @@ Ces deux codes ci-dessus font exactement la même chose.
 * Dans le cas de `dup2`, c'est exactement la même chose, sauf qu'il ferme `1` lui-même.
 
 
+```C
+#include <sys/types.h>
+#include <dirent.h>
+DIR * opendir(const char * name);
+```
+
+Ouvre un flux sur le répertoire correspondant au nom passé en paramètre.
+
+```C
+#include <dirent.h>
+struct direct * readdir(DIR * dir);
+```
+
+* Retourne un pointeur vers une structure dirent qui représente le prochain
+  répertoire dans le flux pointé par `dir`. Retourne NULL si la fin du
+  répertoire est atteinte ou si une erreur survient.
+* La structure dirent est détaillée ci-dessous :
+
+```C
+struct dirent 
+{
+	ino_t d_ino;      // Numéro d'inode
+	char d_name[256]; // Le nom du fichier 
+};
+```
+
+Seuls les deux fichiers ci-dessus font partie du standard. Les autres champs
+(visibles grâce à man 3 readdir) ne sont pas implémentés dans tous les systèmes.
+
+```C
+#include <sys/types.h> 
+#include <dirent.h>
+int closedir(DIR * dir);
+```
+
+`closedir` ferme le flux associé à `dir`. Retourne -1 si une erreur survient, 0
+sinon.
+
+```C
+#include <unistd.h>
+int pipe(int pipefd[2]);
+```
+
+`pipe` créé un pipe (canal unidirectionnel qui est utilisé dans la communication
+inter-process). Le tableau `pipefd` est utilisé pour retourné deux descripteurs
+de fichiers où :
+
+* pipefd[1] correspond à la sortie du premier process (écriture).
+* pipefd[0] corresppond à l'entrée du deuxième process (lecture).
+
+Exemple : ls | wc -c
+
+```
+int p[2];
+
+pipe(p);
+
+if(fork() == 0)
+{
+	close(p[0]); // Ne lit pas dans le pipe
+	dup2(p[1], 1); // La sortie standard devient l'entrée du pipe
+	close(p[1]);
+	execlp("ls", "ls", NULL);
+}
+
+if(fork() == 0)
+{
+	close(p[1]); // N'écrit pas dans le pipe
+	dup2(p[0], 0); // L'entrée standard devient la sortie du pipe
+	close(p[0]);
+	execlp("wc", "wc", "-c", NULL);
+}
+
+close(p[0]);
+close(p[1]);
+
+```
+
 #### (EXT2) Détaillez comment l'OS mémorise les liens à l'aide d'exemple (soft, hard)
 
 #### (EXT2) Détaillez la notion de fichier creux à l'aide d'un exemple (création, taille, occupation du disque)
