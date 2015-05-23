@@ -98,7 +98,7 @@ dup2(p[0], 0);  // Entrée standard = la lecture dans le pipe
 ```
 
 Après cela, par le biais du principe de "producteur consommateur", le 2e fils
-peut lire dans le pipe jusqu'à obtention du E.O.F. que le `ls` aura envoyé quand
+peut lire dans le pipe jusqu'à obtention du \texttt{E.O.F.} que le `ls` aura envoyé quand
 il n'aura plus rien à écrire.
 
 Ainsi, exécuter les logiciels via la commande `exec` ne remplacera pas la table
@@ -114,15 +114,17 @@ execl("/usr/bin/wc", "wc", "-l", NULL);
 
 \newpage
 
-#### Quels appels système permettent de gérer les signaux ? Détaillez-en les paramètres et le fonctionnement. Quelles sont les limites et les défauts de ces signaux ? Quel est le rôle de la table des interruptions, de la table des processus, de l'ordonnanceur dans ces cas ?
+#### Quels appels système permettent de gérer les signaux ? Détaillez en les paramètres et le fonctionnement. Quelles sont les limites et les défauts de ces signaux ? Quel est le rôle de la table des interruptions, de la table des processus, de l'ordonnanceur dans ces cas ?
 
-Il faut utiliser le prototype
+Il faut utiliser le prototype :
 
 ```{.C}
 sigaction(SIGNAL, nouveau_trigger, ancien_trigger);
 ```
 
-Pour assigner une procédure à un signal
+Qui retourne 0 en cas de succès ou -1 en cas d'erreur.
+
+Pour assigner une procédure à un signal :
 
 ```C
 struct sigaction action_handler;
@@ -131,6 +133,9 @@ sigaction(SIGNAL, action_handler, NULL);
 
 // Méthode deprecated
 signal(INTERRUP, void (* fct)(int));
+// Qui retournera `SIG_ERR` en cas d'erreur, ou l'ancienne action en cas de
+// réussite.
+
 
 ```
 
@@ -145,12 +150,31 @@ sigaction(SIGNAL, &action_handler, NULL);
 signal(INTERRUP, SIG_IGN);
 ```
 
-La table des interruptions lie chaque interruption à une fonction et un bit
-d'activation. Lors d'une interruption, le tableau est scanné et le premier bit à
-1 trouvé lance la fonction associée. Il est donc impossible de lancer plusieurs
-fois la même interruption.
+Pour rétablir le comportement par défaut, il faut lier `SIG\_DFL`.
 
-Certaines interruptions ne peuvent être changées \textbf{JSAIS PLUS QUOIII}.
+La table des interruptions lie chaque interruption à une fonction et un bit
+d'activation. Lors d'une interruption, le tableau est scanné \textbf{quand le
+process devient élu} et le premier bit à 1 trouvé lance la fonction associée. 
+Il est donc impossible de lancer plusieurs fois la même interruption. 
+(32 entrées dans la table = 32 bits, un par interruption, et 32 pointeurs de 
+fonctions, un par interruption).
+
+Quand l'ordonnanceur donne la main :
+
++ il exécute en priorité le tableau d'interruptions
++ puis remet les bits, qui étaient à 0, à 1
++ reprend le processus où il s'était interrompu.
+
+Si nous lançons plusieurs fois la même interruption (spam Ctrl^c), elle ne sera
+faite qu'une fois puisque le bit se mettra une fois à 1.
+
+Si un signal arrive avant un autre, il ne sera pas spécialement effectué en
+priorité.
+
+Certaines interruptions ne peuvent être changées :
+
++ SIGKILL
++ SIGSTOP
 
 2 interruptions sont spécialement créées pour "l'utilisateur" car elles ne
 possèdent pas de signification.
@@ -164,6 +188,11 @@ Pour "lancer" un signal manuellement, il faut utiliser la commande
 kill(PID, INTERRUP);
 ```
 
+Un process peut faire une "attente active" (ou volontaire) d'un signal à l'aide
+de `int pause(void)`, évitant le sempiternel `while(1)`.
+
+L'appel système `int alarm(unsigned sec)` permet de mettre un minuteur qui lance
+un `SIGALRM` après sec secondes.
 
 #### socket(), bind(), listen(), accept(), connect() : Quelle est l'utilité ? Quels sont les arguments ? Quelle est la valeur de retour ? 
 
