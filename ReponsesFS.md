@@ -287,19 +287,71 @@ int fstat(int fd, struct stat * buf);
 int lstat(const char * path, struct stat * buf);
 ```
 
+`stat` permet d'obtenir des informations contenues dans l'inode d'un fichier.
+L'utilisateur doit avoir le droit d'accéder au dossier parent de ce fichier mais
+ne doit pas nécessairement avoir de droits pour ce fichier.
+
+Quelques champs utiles de la structure stat (man 2 stat pour voir la structure
+complète).
+
+* `stat / lstat` :
+	+ path correspond au nom du fichier.
+	+ buf correspond à l'adresse d'une zone où seront stockées les informations
+	  correspondantes au fichier (adresse d'une structure stat, voir ci-dessous).
+* `fstat`
+	+ fd correspond au descripteur de fichier.
+	+ buf correspond à l'adresse d'une zone où seront stockées les informations
+	  correspondantes au fichier (adresse d'une structure stat, voir
+	  ci-dessous).
+
+`lstat` est identique à stat, sauf que si le fichier est un lien soft, alors les
+informations obtenues concernent ce lien. Pour `stat`, si le fichier est un lien
+soft, alors les informations obtenues concernent le fichier sur lequel ce lien
+pointe.
+
 ```C
 struct stat
 {
-	dev_t st_dev; // ID of device containing file
-	ino_t st_ino; // numéro de l'inodeA
-	mode_t st_mode; // les permissions
-	nlink_t st_nlink; // Nombre de liens hard
-	uid_t st_uid; // user ID du propriétaire
-	gid_t st_gid; // group ID du propriétaire
-    // PAS FINI	
-}
+	ino_t st_ino;	 		// numéro de l'inode
+	mode_t st_mode;  		// les permissions
+	nlink_t st_nlink; 		// Nombre de liens hard
+	uid_t st_uid; 			// user ID du propriétaire
+	gid_t st_gid; 			// group ID du propriétaire
+	off_t st_size; 			// la taille en bytes
+	blksize_t st_blksize; 	// La taille des blocs
+	blkcnt_t st_blocks; 	// Nombre de blocs de 512 bytes alloués
+	time_t st_atime; 		// Date/heure du dernier accès
+	time_t st_mtime; 		// Date/heure de la dernière modification
+};
 ```
 
+```C
+#include <unistd.h>
+int dup(int oldfd);
+int dup2(int oldfd, int newfd);
+```
+
+`dup` et `dup2` créent une copie de l'entrée du descripteur `oldfd`. 
+
+* `dup` crée une copie de oldfd et retourne le plus petit descripteur de fichier
+  non utilisé comme nouveau descripteur.
+
+* `dup2` fait de newfd la copie de oldfd et ferme newfd si nécessaire.
+
+Exemple : rediriger la sortie standard vers un fichier :
+
+```C
+close(1);
+int nouveau_h = dup(h_fichier);
+close(h_fichier);
+```
+
+```C
+dup2(h_fichier, 1);
+close(h_fichier);
+```
+
+Ces deux codes ci-dessus font exactement la même chose.
 
 #### (EXT2) Détaillez comment l'OS mémorise les liens à l'aide d'exemple (soft, hard)
 
