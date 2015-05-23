@@ -198,6 +198,20 @@ un `SIGALRM` après sec secondes.
 
 #### Utilisation de l'appel système pipe et situations d'interblocages : expliquez en vous basant sur des exemples de code comment une telle situation peut être obtenue. Détaillez et faites le lien avec les appels système Up et Down.
 
+Soient deux processus p1 et p2 et deux tubes t1 et t2.
+
++ p1 va lire dans t1, mais t1 est vide donc p1 attend.
++ p2 (arrive dans le game) va lire dans t2 mais t2 est vide donc p2 attend.
+
+Qui va remplir t1 et t2 ?
+
++ p1 est le processus qui va remplir t2, mais il est bloqué
++ p2 est le processus qui va remplir t1, mais il est bloqué
+
+=> aucun des deux processus ne va pouvoir ECRIRE car aucun des deux ne peut
+terminer de LIRE car il n'y a pas de \texttt{E.O.F.} dans le pipe car aucun ne
+va ECRIRE ... \texttt{OUROBORS}
+
 ## Questions secondaires
 
 #### (socket) Quelle est l'utilité de la fonction htons() ? Comment faire parvenir un message à un processus qui s'exécute sur un autre ordinateur ? 
