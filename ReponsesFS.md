@@ -376,8 +376,8 @@ Ouvre un flux sur le répertoire correspondant au nom passé en paramètre.
 struct direct * readdir(DIR * dir);
 ```
 
-* Retourne un pointeur vers une structure dirent qui représente le prochain
-  répertoire dans le flux pointé par `dir`. Retourne NULL si la fin du
+* Retourne un pointeur vers une structure dirent qui représente la prochaine
+  entrée dans le flux pointé par `dir`. Retourne NULL si la fin du
   répertoire est atteinte ou si une erreur survient.
 * La structure dirent est détaillée ci-dessous :
 
@@ -410,8 +410,10 @@ int pipe(int pipefd[2]);
 inter-process). Le tableau `pipefd` est utilisé pour retourné deux descripteurs
 de fichiers où :
 
-* pipefd[1] correspond à la sortie du premier process (écriture).
-* pipefd[0] corresppond à l'entrée du deuxième process (lecture).
+* pipefd[0] correspond à la sortie du pipe, "la source" du flux qui peut être
+  lu.
+* pipefd[1] correspond à l'entrée du pipe, "l'entonnoir" du flux qui peut être
+  rempli.
 
 Exemple : ls | wc -c
 
