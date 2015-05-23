@@ -194,6 +194,13 @@ handle = open("/usr/home/d", O_RDONLY);
 
 #### (EXT2) Détaillez les situations d'incohérence et montrer comment l'OS récupère cette situation
 
+Intégrité des liens hard : On parcourt tout le F.S, on regarde le nombre de
+liens dans l'inode d'un fichier et on compare avec le nombre de fichiers ayant
+cet inode. Si le compteur d'inode est incohérent, on le corrige.
+
+Fichier fantôme : fichier référencé dans un inode mais aucun fichier avec cet
+inode n'est référencé dans un répertoire.
+
 #### (EXT2) Détaillez le contenu d'un super-bloc et l'utilité des champs qui s'y trouvent
 
 La réponse est présente dans la question principale sur EXT.
