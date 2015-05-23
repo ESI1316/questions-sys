@@ -154,9 +154,7 @@ au contenu des clusters. Le système analyse le disque :
 
 * Si la suite d'un fichier est un cluster vide, on remplace l'adresse par -1.
 * Si on trouve un cluster qui contient des données mais ne semble appartenir à
-  aucun fichier, et qu'il n'est pas libre. L'OS dépose alors le fragment de
-  fichier dans le dossier lost+found (il y crée un fichier avec l'adresse du
-  premier cluster).
+  aucun fichier, et qu'il n'est pas libre. 
 
 #### (EXT2) Détaillez comment l'OS retrouve un fichier, ajoute des données à ce fichier, efface ce fichier.
 
@@ -456,7 +454,8 @@ write(handle, "1", 1);
 et "2" à la position 100000.
 
 ```C
-write(handle, "2", 100000);
+lseek(handle, 100000, SEEK_CUR);
+write(handle, "2", 1);
 ```
 
 Lors d'une lecture, le système retournera des 0 binaires, mais il ne stocke pas
