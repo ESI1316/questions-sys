@@ -115,7 +115,31 @@ avec indirection.
   tableau de blocs qui pointent eux même sur un tableau de blocs qui pointent
   eux même sur un tableau de blocs qui pointent vres les blocs de données.
 
-En EXT, le répertoire racine correspond toujours à l'inode numéro 2.
+Comme en FAT, un répertoire est un fichier dont les données forment la liste des
+fichiers qu'il contient. Chaque ficier est représenté par deux champs, son nom
+et son numéro d'inode. Le répertoire racine en EXT a toujours l'inode numéro 2.
+Les blocs défectueux ont l'inode 1.
+
+Le superbloc est spécifique à EXT, il contient des informations sur les tableaux
+d'inodes et de blocs. Il permet de connaître leur position, le nombre d'inodes,
+le nombre de blocs, la taille d'un bloc. Le superbloc gère également les blocs
+libre. Il contient un bloc dont les données sont des adresses de blocs libres.
+La dernière adresse du bloc pointe vers un autre bloc contenant aussi des
+adresses de blocs libres et ainsi de suite. L'avantage de ce système est qu'il
+ne prend aucune place sur le disque.
+
+```
+ Superbloc   0   1   2   3   4   5
+ -----     -------------------------
+ |1|2|     |   |   |   |   |5|6|   |
+ |3|4|     |   |   |   |   |7|8|   |
+ -----     -------------------------
+```
+
+Dans l'exemple ci-dessus, le bloc 1, 2, 3, et 4 sont libres dans le superbloc.
+La dernière adresse est 4. On va donc voir dans le bloc 4 pour les prochains
+blocs libres, celui-ci nous dit que les blocs 5, 6, 7 et 8 sont libres et qu'il
+faut aller dans le bloc 8 pour connaître la suite des blocs libres.
 
 Voir questions liens soft/hard pour les liens.
 
