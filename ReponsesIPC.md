@@ -161,8 +161,8 @@ fonctions, un par interruption).
 
 Quand l'ordonnanceur donne la main :
 
-+ il exécute en priorité le tableau d'interruptions
-+ puis remet les bits, qui étaient à 0, à 1
++ il exécute en priorité le tableau d'interruptions.
++ puis remet les bits, qui étaient à 1, à 0.
 + reprend le processus où il s'était interrompu.
 
 Si nous lançons plusieurs fois la même interruption (spam Ctrl^c), elle ne sera
