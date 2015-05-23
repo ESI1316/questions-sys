@@ -196,7 +196,11 @@ handle = open("/usr/home/d", O_RDONLY);
 
 #### (EXT2) Détaillez le contenu d'un super-bloc et l'utilité des champs qui s'y trouvent
 
+La réponse est présente dans la question principale sur EXT.
+
 #### (EXT2) Détaillez le contenu d'un inode et l'utilité des champs qui s'y trouvent
+
+La réponse est présente dans la question principale sur EXT.
 
 #### (EXT2) Détaillez les appels système qui permettent d'utiliser le système de fichier (open, read, write, close, dir, dup, lseek, stat, ...) et comment l'OS implémente ces appels système (handle, TDFO, ...)
 
@@ -466,6 +470,31 @@ close(p[1]);
 ```
 
 #### (EXT2) Détaillez comment l'OS mémorise les liens à l'aide d'exemple (soft, hard)
+
+* Les liens hards : on souhaite que plusieurs utilisateurs accèdent au même
+  fichier mais sous plusieurs noms différents à des path différents (le nom
+  peut être le même car le nom est lié au répertoire parent, non à l'inode). Ces
+  deux fichiers ont le même inode, ce qui signifie que les deux fichiers ne sont
+  en fait qu'un seul et unique fichier. Cependant ces deux fichiers doivent se
+  trouver sur le même mini-disque. Si un des deux fichier est modifié, le 2ème
+  le sera également étant donné qu'il s'agit du même fichier.
+  Dans l'inode du fichier, un compteur de lien hard est présent, ce compteur est
+  décrémenté quand un des deux fichier est supprimé et est incrémenté quand un
+  nouveau lien hard est créé sur ce fichier. Les blocs du fichier de base 
+  sont libérés seulement quand le compteur passe à 0. (ls -l permet de voir le
+  nombre de liens pour chaque fichier). 
+
+* Les liens softs : Le lien soft, contrairement au lien hard, est un autre
+  fichier. Les données de ce fichiers sont le chemin du fichier pointé par le
+  lien. Dans l'inode de ce fichier, le type est un lien. Un lien soft peut
+  référencer un fichier sur un autre mini-disque. Quand on efface le lien, on
+  efface seulement le lien, pas le fichier. Si on efface le fichier de base, le
+  lien soft existe toujours mais n'est plus valable.
+
+Pour créer des liens sur linux : 
+
+* Liens hard : `ln fichier nom_lien`
+* Liens soft : `ln -s fichier nom_lien`
 
 #### (EXT2) Détaillez la notion de fichier creux à l'aide d'un exemple (création, taille, occupation du disque)
 
