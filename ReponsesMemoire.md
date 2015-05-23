@@ -164,5 +164,7 @@ Si une page n'est pas en mémoire, voici les solutions possibles :
   petite valeur binaire est supprimée.
 
 
+Il existe également un démon de pagination qui libère les pages peu utilisées à
+intervalles réguliers pour limiter les defauts de page.
 
 
