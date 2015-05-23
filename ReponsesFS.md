@@ -75,6 +75,8 @@ Voir les questions secondaires FAT.
 
 #### Décrivez la structure d'une partition formatée en EXT/EXT2
 
+`Voir question ext/ext2 (dernière) pour les différences`
+
 EXT : 
 
 En EXT, un mini-disque (une partition) est composée de quatres zones : 
@@ -101,7 +103,7 @@ l'inode, cet inode comprend :
 * Liste de tous les blocs du fichiers
 
 Le chaînage est donc fait dans l'inode lui même. 
-La liste de tous les blocs contient 10 pointeurs de blocs direct, et 3 pointeurs
+La liste de tous les blocs contient 10 pointeurs (12 en ext2) de blocs direct, et 3 pointeurs
 avec indirection.
 
 * Le 11ème pointeur contient un seul niveau d'indirection, il
@@ -122,7 +124,10 @@ Les blocs défectueux ont l'inode 1.
 
 Le superbloc est spécifique à EXT, il contient des informations sur les tableaux
 d'inodes et de blocs. Il permet de connaître leur position, le nombre d'inodes,
-le nombre de blocs, la taille d'un bloc. Le superbloc gère également les blocs
+le nombre de blocs, la taille d'un bloc. 
+
+En EXT : 
+Le superbloc gère également les blocs
 libre. Il contient un bloc dont les données sont des adresses de blocs libres.
 La dernière adresse du bloc pointe vers un autre bloc contenant aussi des
 adresses de blocs libres et ainsi de suite. L'avantage de ce système est qu'il
@@ -135,6 +140,9 @@ ne prend aucune place sur le disque.
  |3|4|     |   |   |   |   |7|8|   |
  -----     -------------------------
 ```
+
+En EXT2 : Le superbloc ne gère plus la gestion des blocs libres, ce sont les
+blocs bitmap et inodes bitmaps pour la gestion des inodes libres.
 
 Dans l'exemple ci-dessus, les blocs 1, 2, 3, et 4 sont libres dans le superbloc.
 La dernière adresse est 4. On va donc voir dans le bloc 4 pour les prochains
@@ -203,11 +211,13 @@ inode n'est référencé dans un répertoire.
 
 #### (EXT2) Détaillez le contenu d'un super-bloc et l'utilité des champs qui s'y trouvent
 
-La réponse est présente dans la question principale sur EXT.
+La réponse est présente dans la question principale sur EXT. + Dernière question
+sur ext/ext2
 
 #### (EXT2) Détaillez le contenu d'un inode et l'utilité des champs qui s'y trouvent
 
-La réponse est présente dans la question principale sur EXT.
+La réponse est présente dans la question principale sur EXT. + Dernière question
+sur ext/ext2
 
 #### (EXT2) Détaillez les appels système qui permettent d'utiliser le système de fichier (open, read, write, close, dir, dup, lseek, stat, ...) et comment l'OS implémente ces appels système (handle, TDFO, ...)
 
@@ -531,6 +541,82 @@ blocs.
 PS : On se déplace dans un fichier avec un lseek(), expliqué dans une autre
 question.
 
-#### (EXT-EXT2) Détaillez la structure d'une partition formatée en EXT et EXT2. Détaillez les avantages d'EXT2 et l'implémentation de ces avantages. Commen EXT2 a t-il évolué ensuite ?
+#### (EXT-EXT2) Détaillez la structure d'une partition formatée en EXT et EXT2. Détaillez les avantages d'EXT2 et l'implémentation de ces avantages. Comment EXT2 a t-il évolué ensuite ?
+
+
+\\
+
+Défauts de l'EXT : 
+
+* Le nom d'un fichier/dossier ne peut pas dépasser 14 caractères.
+* Les inodes et les blocs ne se trouvent pas au même endroit ce qui demande
+  beaucoup de déplacement au niveau des têtes de lecture.
+* Le superbloc contient des informations vitales pour le système et il n'en
+  existe aucune copie.
+* Problèmes de fragmentation : les blocs d'un fichier sont alloués
+  aléatoirement.
+ 
+Améliorations apportées par EXT2 : 
+
+Structure d'un groupe : 
+
+```
+		-------------------------
+		| 1 | 2 | 3 | 4 | 5 | 6 |
+		-------------------------
+```
+
+* On peut améliorer les performances (moins de déplacement pour la tête de
+  lecture) en regroupant les blocs d'un fichier dans une même zone. 
+
+* Le mini-disque est maintenant divisé en groupes (4 par exemple). Chaque
+  groupe possède une structure similaire au mini-disque.
+	* 1 : Copie du super bloc du mini-disque. Contient : 
+		- nombre de blocs et d'inodes
+		- nombre de blocs et d'inodes libres (pour ne pas devoir recompter)
+		- la taille d'un bloc
+		- le nombre de blocs et d'inodes par groupe
+		- D'autres champs comme le nombre de montage, la date de dernière
+		  vérification sont présents.
+	* 2 : description du groupe
+	* 3 : Blocs bitmap : liste de bits où chaque bit représente un bloc. Si ce
+	  bite vaut 1, le blot est utilisé, sinon il est libre.
+	* 4 : Inode bitmap : liste de bits où chaque bit représente un inode. Si ce
+	  bit vaut 1, l'inode est utilisé, sinon il est libre.
+	* 5 : Inodes : ils contiennent maintenant 12 adresses directes et 3
+	  indirections.
+	* 6 : Blocs
+
+* Pour un répertoire, on essaye de regrouper les inodes de ses fichiers dans un
+  même groupe mais de mettre ce répertoire dans un autre groupe que son parent.
+
+* Lorsqu'on veut allouer un bloc à un fichire, on fait la démarche suivante : 
+	* On recherche un bloc voisin au dernier bloc alloué. On essaye qu'ils se
+	  trouvent sur la même piste à environ 16 blocs d'écart.
+	* Sinon on réserve 8 blocs libres (overbooking = réserver plus que ce qu'il
+	  ne faut), ce qui correspond à un byte dans le bloc bitmap.
+	* Sinon on recherche un bloc isolé dans le même groupe.
+	* Sinon on réserve 8 blocs dans un autre groupe.
+
+* Les noms de fichiers et répertoires ne sont plus limité à 14 bytes,
+  possibilités d'avoir des noms longs. Une entrée d'un répertoire est maintenant
+  structurée de la manière suivante : 
+	* Numéro d'inode sur 4 bytes
+	* Longueur de l'entrée sur 2 bytes
+	* Longueur du nom de fichier sur 2 bytes
+	* Nom de fichier sur x bytes où x est un multiple de 4.
+
+* Si on doit effacer une entrée, la taille de la précédente augmente pour
+  occuper l'espace libre. Cet espace pourra être utilisé pour une nouvelle
+  entrée.
+
+* Si on renomme un fichier et que ce nouveau nom dépasse l'espace réservé, on
+  copie l'entrée à la fin du dossier, on renomme le fichier et on efface
+  l'ancienne entrée comme décrit ci-dessus.
+	
+* Les liens symboliques sont spécifiques à EXT2.
+	
+
+			 
 
 
