@@ -185,6 +185,7 @@ handle = open("/usr/home/d", O\_RDONLY);
 int creat(const char * pathname, mode_t mode);
 int open(const char * pathname, int flags);
 int open(const char * pathname, int flags, mode_t mode);
+int close(int fd);
 ```
 
 open retourne un descripteur de fichier. Un descripteur de fichier reste ouvert
@@ -192,6 +193,10 @@ par défaut après une fonction exec.
 
 creat retourne également un descripteur de fichier, open peut également créer
 des fichiers si le flag O_CREAT est spécifié.
+
+close ferme un descripteur de fichier. Si le descripteur spécifié en paramètre
+est le dernier descripteur correspondant à un fichier ouvert, alors les
+ressources sont libérées. close retourne 0 si il réussit, -1 sinon.
 
 open créé une nouvelle entrée dans la table des descripteur des fichiers ouverts
 (tdfo). Cette entrée comprend l'offset et le statut du fichier
@@ -214,10 +219,81 @@ On peut utiliser plusieurs flags en les séparants avec le séparateur de flags
 "|".
 
 Dans le cas d'une création, il faut spécifier un mode. mode est ignoré si
-O_CREAT n'est pas présent. Le mode corresponds aux droits du fichier une fois
+O_CREAT n'est pas présent. Le mode correspond aux droits du fichier une fois
 créé. 
 
-Exemple 
+
+```C
+#include <unistd.h>
+ssize_t read(int fd, void * buffer, size_t buffer_size);
+```
+
+* fd correspond au descripteur de fichier retourné par open/creat.
+* buffer correspond à la zone mémoire ou iront les données lues.
+* buffer_size correspond au nombre d'octet qui doivent être lus à partir de
+  l'offset du fichier spécifié dans la tdfo. Si l'offset vaut E.O.F, rien n'est
+  lu et read() retourne 0.
+* read retourne le nombre de bytes lus ou 0 si la fin du fichier est atteinte.
+  L'offset du fichier est avancé par ce nombre.
+
+
+
+```C
+#include <unistd.h>
+ssize_t write(int fd, const void * buffer, size_t buffer_size);
+```
+
+* fd correspond au descripteur retourné par open/creat.
+* buffer correspond à la zone mémoire contenant les données à écrire dans le
+  fichier.
+* buffer_size correspond au nombre d'octet à écrire.
+* write retourne le nombre de bytes écrit dans le fichier. Ce nombre peut être
+  plus petit que buffer_size si la place est insuffisante sur le disque dur.
+  write retourne -1 si erreur.
+* write écrit à l'offset du fichier. Cet offset est incrémenté par le nombre de
+  bytes écrit.
+
+
+```C
+#include <sys/types.h>
+#include <unistd.h>
+off_t lseek(int fd, off_t offset, int whence);
+```
+
+lseek a pour but de repositionner l'offset du fichier ouvert associé au
+descripteur de fichier fd spécifié en paramètre.
+
+* offset correspond au décalage par rapport à l'offset courant.
+* whence correspond à la position de départ du décalage.
+	+ SEEK_SET : correspond au début du fichier.
+	+ SEEK_CUR : correspond à la position actuelle de l'offset.
+	+ SEEK_END : corresond à la fin du fichier.
+* lseek retourne la nouvelle position de l'offset par rapport au début du
+  fichier. Si il y a erreur, -1 est retourné.
+
+
+```C
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+int stat(const char * path, struct stat * buf);
+int fstat(int fd, struct stat * buf);
+int lstat(const char * path, struct stat * buf);
+```
+
+```C
+struct stat
+{
+	dev_t st_dev; // ID of device containing file
+	ino_t st_ino; // numéro de l'inodeA
+	mode_t st_mode; // les permissions
+	nlink_t st_nlink; // Nombre de liens hard
+	uid_t st_uid; // user ID du propriétaire
+	gid_t st_gid; // group ID du propriétaire
+    // PAS FINI	
+}
+```
+
 
 #### (EXT2) Détaillez comment l'OS mémorise les liens à l'aide d'exemple (soft, hard)
 
