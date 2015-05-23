@@ -136,7 +136,7 @@ ne prend aucune place sur le disque.
  -----     -------------------------
 ```
 
-Dans l'exemple ci-dessus, le bloc 1, 2, 3, et 4 sont libres dans le superbloc.
+Dans l'exemple ci-dessus, les blocs 1, 2, 3, et 4 sont libres dans le superbloc.
 La dernière adresse est 4. On va donc voir dans le bloc 4 pour les prochains
 blocs libres, celui-ci nous dit que les blocs 5, 6, 7 et 8 sont libres et qu'il
 faut aller dans le bloc 8 pour connaître la suite des blocs libres.
