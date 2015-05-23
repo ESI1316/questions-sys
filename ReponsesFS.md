@@ -340,7 +340,7 @@ Exemple : rediriger la sortie standard vers un fichier :
 
 ```C
 close(1);
-int nouveau_h = dup(h_fichier, 1);
+int nouveau_h = dup(h_fichier);
 close(h_fichier);
 ```
 
