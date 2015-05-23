@@ -415,7 +415,7 @@ de fichiers où :
 
 Exemple : ls | wc -c
 
-```
+```C
 int p[2];
 
 pipe(p);
