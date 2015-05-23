@@ -117,8 +117,6 @@ avec indirection.
 
 En EXT, le répertoire racine correspond toujours à l'inode numéro 2.
 
-
-
 Voir questions liens soft/hard pour les liens.
 
 
@@ -132,7 +130,7 @@ Les partitions logique peuvent être divisées en partitions étendues.
 
 #### (FAT) Détaillez comment l'OS retrouve un fichier, ajoute des données à ce fichier, efface ce fichier
 
-Exemple pour retrouver un fichier : int h = open("/home/user/f1");
+Exemple pour retrouver un fichier : int h = open("/home/user/f1", O_RDONLY);
 
 * En FAT16 : Le cluster 0 contient la racine. Dans la liste des descripteurs
   présent dans le répertoire racine, l'OS cherche un descripteur avec le nom
@@ -162,13 +160,13 @@ au contenu des clusters. Le système analyse le disque :
 
 #### (EXT2) Détaillez comment l'OS retrouve un fichier, ajoute des données à ce fichier, efface ce fichier.
 
-handle = open("/usr/home/d", O\_RDONLY);
+handle = open("/usr/home/d", O_RDONLY);
 
 + / (root) == inode 2 	=> Numero de bloc 	28 
 + bloc 28 => contient l'entrée "usr, inode 35"
 + usr/ == inode 35 	=> Numero de bloc 64
 + bloc 64 => contient l'entrée "home, inode 11"
-+ home == inode 11 	=> Numero de bloc 77
++ home/ == inode 11 	=> Numero de bloc 77
 + bloc 77 => contient l'entrée "d, inode 45"
 + d == inode 45, l'ensemble des blocs appartiennent au fichier "d".
 
@@ -182,44 +180,48 @@ handle = open("/usr/home/d", O\_RDONLY);
 
 
 ```C
-int creat(const char * pathname, mode_t mode);
+int creat(const char * pathname, mode_t mode); 
 int open(const char * pathname, int flags);
 int open(const char * pathname, int flags, mode_t mode);
 int close(int fd);
 ```
 
-open retourne un descripteur de fichier. Un descripteur de fichier reste ouvert
-par défaut après une fonction exec.
+`open` retourne un descripteur de fichier, c'est à dire une entrée dans la table 
+des handle du process pointant vers la table des fichiers ouvert (TDFO). 
+Un descripteur de fichier reste ouvert par défaut après une fonction `exec`car
+elle n'écrase pas la table des handle du process.
 
-creat retourne également un descripteur de fichier, open peut également créer
-des fichiers si le flag O_CREAT est spécifié.
+`creat` retourne également un descripteur de fichier, `open` peut également créer
+des fichiers si le flag `O_CREAT` est spécifié.
 
-close ferme un descripteur de fichier. Si le descripteur spécifié en paramètre
-est le dernier descripteur correspondant à un fichier ouvert, alors les
-ressources sont libérées. close retourne 0 si il réussit, -1 sinon.
+`close` ferme un descripteur de fichier, son entrée dans la table des handle. 
+Si le descripteur spécifié en paramètre est le dernier descripteur correspondant 
+à un fichier ouvert dans la TDFO, alors les ressources sont libérées dans cette 
+dernière. close retourne 0 si il réussit, -1 sinon.
 
-open créé une nouvelle entrée dans la table des descripteur des fichiers ouverts
-(tdfo). Cette entrée comprend l'offset et le statut du fichier
+`open` créé une nouvelle entrée dans la table des descripteur des fichiers ouverts
+(`TDFO`) si il n'est pas déjà ouvert, sinon il partage cette entrée. Cette entrée 
+comprend l'offset et le statut du fichier
 
 Flags de open : 
 
-* O_RDONLY : lecture seulement
-* O_WRONLY : écriture seulement
-* O_CREAT : création
-* O_RDWR : lecture et écriture
-* O_APPEND : append : Avant chaque écriture : l'offset est positionné à la fin
+* `O_RDONLY` : lecture seulement
+* `O_WRONLY` : écriture seulement
+* `O_CREAT` : création
+* `O_RDWR` : lecture et écriture
+* `O_APPEND` : append : Avant chaque écriture : l'offset est positionné à la fin
   du fichier comme si on utilisait un lseek.
-* O_TRUNC : Le fichier est "tronqué" (le contenu est supprimé).
+* `O_TRUNC` : Le fichier est "tronqué" (le contenu est supprimé).
 
-Il est évident que pour O_APPEND et O_TRUNC, il faut un flag en écriture.
-L'effet de O_RDONLY | O_TRUNC est indéfini et varie selon les implémentations,
+Il est évident que pour `O_APPEND` et `O_TRUNC`, il faut un flag en écriture.
+L'effet de `O_RDONLY` | `O_TRUNC` est indéfini et varie selon les implémentations,
 mais a de grande chance d'être tronqué.
 
 On peut utiliser plusieurs flags en les séparants avec le séparateur de flags
-"|".
+"|", le `ou binaire`.
 
 Dans le cas d'une création, il faut spécifier un mode. mode est ignoré si
-O_CREAT n'est pas présent. Le mode correspond aux droits du fichier une fois
+`O_CREAT` n'est pas présent. Le mode correspond aux droits du fichier une fois
 créé. 
 
 
@@ -228,11 +230,12 @@ créé.
 ssize_t read(int fd, void * buffer, size_t buffer_size);
 ```
 
-* fd correspond au descripteur de fichier retourné par open/creat.
-* buffer correspond à la zone mémoire ou iront les données lues.
-* buffer_size correspond au nombre d'octet qui doivent être lus à partir de
-  l'offset du fichier spécifié dans la tdfo. Si l'offset vaut E.O.F, rien n'est
-  lu et read() retourne 0.
+* `fd` correspond au descripteur de fichier retourné par open/creat, dans la
+  table des handles.
+* `buffer` correspond à la zone mémoire ou iront les données lues.
+* `buffer_size` correspond au nombre d'octet qui doivent être lus à partir de
+  l'offset du fichier spécifié dans la TDFO. Si l'offset vaut \texttt{E.O.F.}, 
+  rien n'est lu et read() retourne 0.
 * read retourne le nombre de bytes lus ou 0 si la fin du fichier est atteinte.
   L'offset du fichier est avancé par ce nombre.
 
@@ -243,12 +246,12 @@ ssize_t read(int fd, void * buffer, size_t buffer_size);
 ssize_t write(int fd, const void * buffer, size_t buffer_size);
 ```
 
-* fd correspond au descripteur retourné par open/creat.
-* buffer correspond à la zone mémoire contenant les données à écrire dans le
+* `fd` correspond au descripteur retourné par open/creat.
+* `buffer` correspond à la zone mémoire contenant les données à écrire dans le
   fichier.
-* buffer_size correspond au nombre d'octet à écrire.
+* `buffer_size` correspond au nombre d'octet à écrire.
 * write retourne le nombre de bytes écrit dans le fichier. Ce nombre peut être
-  plus petit que buffer_size si la place est insuffisante sur le disque dur.
+  plus petit que `buffer_size` si la place est insuffisante sur le disque dur.
   write retourne -1 si erreur.
 * write écrit à l'offset du fichier. Cet offset est incrémenté par le nombre de
   bytes écrit.
@@ -260,17 +263,20 @@ ssize_t write(int fd, const void * buffer, size_t buffer_size);
 off_t lseek(int fd, off_t offset, int whence);
 ```
 
-lseek a pour but de repositionner l'offset du fichier ouvert associé au
+`lseek` a pour but de repositionner l'offset du fichier ouvert associé au
 descripteur de fichier fd spécifié en paramètre.
 
 * offset correspond au décalage par rapport à l'offset courant.
 * whence correspond à la position de départ du décalage.
-	+ SEEK_SET : correspond au début du fichier.
-	+ SEEK_CUR : correspond à la position actuelle de l'offset.
-	+ SEEK_END : corresond à la fin du fichier.
+	+ `SEEK_SET` : correspond au début du fichier.
+	+ `SEEK_CUR` : correspond à la position actuelle de l'offset.
+	+ `SEEK_END` : corresond à la fin du fichier.
 * lseek retourne la nouvelle position de l'offset par rapport au début du
   fichier. Si il y a erreur, -1 est retourné.
 
+```C
+int position_actuelle = lseek(fd, 0, SEEK_CUR); // Connaitre l'offset de la TDFO
+```
 
 ```C
 #include <sys/types.h>
@@ -299,14 +305,27 @@ struct stat
 
 #### (EXT2) Détaillez la notion de fichier creux à l'aide d'un exemple (création, taille, occupation du disque)
 
-Exemple : On écrit dans un fichier "1" à la position 1 et "2" à la position 100000.
+Exemple : On écrit dans un fichier "1" à la position 1
+```C
+int handle = open("file", O_WRONLY);
+write(handle, "1", 1);
+```
+
+et "2" à la position 100000.
+
+```C
+write(handle, "2", 100000);
+```
+
 Lors d'une lecture, le système retournera des 0 binaires, mais il ne stocke pas
-sur le disque. Les blocs qui contiennent des 0 ont l'adresse 0 dans l'inode
-(aucun bloc réservé). Dans ce cas le fichier n'occuperait que 3 blocs sur le
+sur le disque. Les blocs qui contiennent des 0 \textbf{ont l'adresse 0 dans l'inode
+(aucun bloc réservé)}. Dans ce cas le fichier n'occuperait que 3 blocs sur le
 disque : celui qui contient le "1", celui qui contient le "2" et le bloc pointé
 par la 11ème adresse. Alors que normalement un tel fichier devrait occuper 100
-blocs. Mais sa taille est bien de 100000 * 4 = 400000 Kb. Mais son disk usage
-est de 3.
+blocs. 
+
++ Sa taille \textbf{est bien de 100000 * 4 = 400000 Kio}. 
++ Son disk usage \textbf{est de 3}.
 
 PS : On se déplace dans un fichier avec un lseek(), expliqué dans une autre
 question.
