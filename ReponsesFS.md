@@ -115,6 +115,12 @@ avec indirection.
   tableau de blocs qui pointent eux même sur un tableau de blocs qui pointent
   eux même sur un tableau de blocs qui pointent vres les blocs de données.
 
+En EXT, le répertoire racine correspond toujours à l'inode numéro 2.
+
+
+
+Voir questions liens soft/hard pour les liens.
+
 
 #### Détaillez comment l'OS permet de découper un disque en plusieurs partitions (primaire, logique, étendue). Quelles sont les limites de cette technique ? Comment évolue-t-elle ? Quels sont les outils utilisés pour gérer ces partition (mkfs, fdisk, mount, unmount, df, /dev, ...) 
 
@@ -173,6 +179,45 @@ handle = open("/usr/home/d", O\_RDONLY);
 #### (EXT2) Détaillez le contenu d'un inode et l'utilité des champs qui s'y trouvent
 
 #### (EXT2) Détaillez les appels système qui permettent d'utiliser le système de fichier (open, read, write, close, dir, dup, lseek, stat, ...) et comment l'OS implémente ces appels système (handle, TDFO, ...)
+
+
+```C
+int creat(const char * pathname, mode_t mode);
+int open(const char * pathname, int flags);
+int open(const char * pathname, int flags, mode_t mode);
+```
+
+open retourne un descripteur de fichier. Un descripteur de fichier reste ouvert
+par défaut après une fonction exec.
+
+creat retourne également un descripteur de fichier, open peut également créer
+des fichiers si le flag O_CREAT est spécifié.
+
+open créé une nouvelle entrée dans la table des descripteur des fichiers ouverts
+(tdfo). Cette entrée comprend l'offset et le statut du fichier
+
+Flags de open : 
+
+* O_RDONLY : lecture seulement
+* O_WRONLY : écriture seulement
+* O_CREAT : création
+* O_RDWR : lecture et écriture
+* O_APPEND : append : Avant chaque écriture : l'offset est positionné à la fin
+  du fichier comme si on utilisait un lseek.
+* O_TRUNC : Le fichier est "tronqué" (le contenu est supprimé).
+
+Il est évident que pour O_APPEND et O_TRUNC, il faut un flag en écriture.
+L'effet de O_RDONLY | O_TRUNC est indéfini et varie selon les implémentations,
+mais a de grande chance d'être tronqué.
+
+On peut utiliser plusieurs flags en les séparants avec le séparateur de flags
+"|".
+
+Dans le cas d'une création, il faut spécifier un mode. mode est ignoré si
+O_CREAT n'est pas présent. Le mode corresponds aux droits du fichier une fois
+créé. 
+
+Exemple 
 
 #### (EXT2) Détaillez comment l'OS mémorise les liens à l'aide d'exemple (soft, hard)
 
