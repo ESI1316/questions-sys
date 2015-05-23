@@ -116,7 +116,7 @@ avec indirection.
   eux même sur un tableau de blocs qui pointent vres les blocs de données.
 
 Comme en FAT, un répertoire est un fichier dont les données forment la liste des
-fichiers qu'il contient. Chaque ficier est représenté par deux champs, son nom
+fichiers qu'il contient. Chaque fichier est représenté par deux champs, son nom
 et son numéro d'inode. Le répertoire racine en EXT a toujours l'inode numéro 2.
 Les blocs défectueux ont l'inode 1.
 
@@ -136,7 +136,7 @@ ne prend aucune place sur le disque.
  -----     -------------------------
 ```
 
-Dans l'exemple ci-dessus, le bloc 1, 2, 3, et 4 sont libres dans le superbloc.
+Dans l'exemple ci-dessus, les blocs 1, 2, 3, et 4 sont libres dans le superbloc.
 La dernière adresse est 4. On va donc voir dans le bloc 4 pour les prochains
 blocs libres, celui-ci nous dit que les blocs 5, 6, 7 et 8 sont libres et qu'il
 faut aller dans le bloc 8 pour connaître la suite des blocs libres.
