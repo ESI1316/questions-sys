@@ -14,8 +14,12 @@
 + Table des processus : Dans la table des processus, l'entrée du père est copiée
   avec tout son contexte pour créer le processus fils.
 
-+ Ordonnanceur : ?
-+ OS : ?
++ Ordonnanceur : Le fork produit une interruption, l'ordonnanceur va placer le
+  processeur fils dans sa file puis choisir un nouveau processus à faire
+  tourner.
+
++ OS : L'OS est chargé de traiter l'interruption, de sauvegarder le contexte du
+  processus, de traiter l'interruption puis de donner la main à l'ordonnanceur.
 
 #### wait(), wait4() : Quelle est l'utiité ? Arguments ? Valeur de retour ?
 
