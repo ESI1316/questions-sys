@@ -92,15 +92,22 @@ En EXT, un mini-disque (une partition) est composée de quatres zones :
  -------------------------------------------------
 ```
 
+La liste des blocs est variable alors que le tableau d'inde est fixe.
+
 Le tableau d'inode contient un inode par fichier. Pour accéder à un fichier, il faut connaître
 l'inode, cet inode comprend : 
 
-* Nom du propriétaire
+* Nom du propriétaire 2bytes
+* Groupe 2 bytes
+* Dates 4 bytes
+* Taille 4 bytes
+* Type (fichier / dossier) 4 bytes
 * Droits d'accès
-* Dates
-* Taille
-* Type (fichier / dossier)
-* Liste de tous les blocs du fichiers
+* Liste de tous les blocs du fichiers 
+	- 10 directs
+	- 1 avec redirection simple (TAILLE BLOC / 4 BYTES = nombre d'adresses)
+	- 1 avec redirection double (simple * simple = nombre d'adresses)
+	- 1 avec redirection triple (simple * simple * simples = nombre d'adresses)
 
 Le chaînage est donc fait dans l'inode lui même. 
 La liste de tous les blocs contient 10 pointeurs (12 en ext2) de blocs direct, et 3 pointeurs
@@ -205,6 +212,28 @@ Partition primaire > partition étendue > partition logique
 
 Chaque partition logique a un EBR == programme d'amorce + table de partitions
 avec des entrées de type "numéro de secteur + taille + numéro section.
+
+`mount PARTITION REPERTOIRE` pour monter un minidisk
+
+`mount /dev/sda7 /home/dir_créé_pour_sda7`
+
+`umount REPERTOIRE` pour démonter un minidisk
+
+`umount /home/dir_créé_pour_sda7`
+
+`df` connaitre les minidisk montés et leurs informations.
+
+`dmesg` afficher des logs contenu dans le buffer du `ring kernel`\footnote{voir
+la notion de ring}
+
+`/etc/fstab` est un fichier contenant des informations sur le F.S. lu uniquement
+par les programmes.
+
+`fdisk` pour manipuler une table de partition d'un disque.
+
+`mkfs -t ext /dev/sdb1` et `mkfs -t vfat /dev/sdb2` donc un type de F.S.
+
+`GPT`= `Global Partition Table` pour des partitions supérieure à 2.2Tio
 
 ## Questions secondaires 
 
@@ -594,6 +623,38 @@ close(p[1]);
 
 ```
 
+Table des handles : propre à tout processus, répertorie tous les fichiers
+ouverts par le processus et les lie à une entrée dans la \texttt{T.D.F.O.}.
+Les trois premières entrée sont déjà ouverte par défaut
+
+```C
+int handle = open("file", FLAGS);
+
+---------------------
+|0 		| 	STDIN	|
+|1 		| 	STDOUT 	|
+|2 		| 	STDERR 	|
+|3 		| 	HANDLE 	|
+--------------------
+```
+
+Table des descripteurs de fichiers ouvert : chaque entrée (indice) possède un
+compteur de "fichiers ouvert", le offset\footnote{position} et un numéro inode
+du fichier. Lors d'un `close(handle);`, si le compteur tombe à zero, les
+ressources du fichier sont liberées.
+
+```
+----------------------------
+i--|CPT		|OFFSET |INODE	|
+----------------------------
+0--|1 		| 	18 	| 	32 	|
+1--|2 		| 	0 	|	31 	|
+2--|3 		| 	3 	| 	14 	|
+3--|6 		| 	8 	| 	27 	|
+----------------------------
+```
+
+
 #### (EXT2) Détaillez comment l'OS mémorise les liens à l'aide d'exemple (soft, hard)
 
 * Les liens hards : on souhaite que plusieurs utilisateurs puissent accéder au même
@@ -724,7 +785,31 @@ Structure d'un groupe :
 	
 * Les liens symboliques sont spécifiques à EXT2.
 	
+#### fsck, pour vérifier l'intégrité du F.S. EXT
 
+Dans un tableau à deux entrées :
+
++ Parcourir la liste des inodes et notes les blocs occupés.
++ Parcourir la liste des blocs libre et les noter
+
+```
+-------------------------------------------------------------------------------
+BLOC | 0 	| 1 	| 2 	| 3 	| ...
+-------------------------------------------------------------------------------
+LIBRE| 0 	| 0 	| 1 	| 1 	| ...
+-------------------------------------------------------------------------------
+BUSY | 1 	| 0 	| 1 	| 0 	| ...
+-------------------------------------------------------------------------------
+```
+
+```scala
+(LIBRE, BUSY) matches {
+	case (1, 0) => "OK"
+	case (0, 1) => "OK"
+	case (0, 0) => "bloc perdu, devient (1, 0)"
+	case (1, 1) => "bloc dans le lost+found car ""occupé"" donc peut-être important."
+}
+```
 			 
 
 
