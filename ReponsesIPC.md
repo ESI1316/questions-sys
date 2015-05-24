@@ -277,6 +277,10 @@ int socket(int family, int type, int protocol);
 * protocol : Protocole utilisé, on utilise 0 dans le cadre du cours (protocole
   par défaut).
 
+La première chose à faire pour créer une communication grâce aux sockets est
+d'appelé la fonction `socket`. Cette fonction va créer le canal de communication
+et retourne un descripteur ou -1 si il y a erreur.
+
 ```C
 int connect(int sockfd, struct sockaddr * serv_addr, int addrlen);
 ```
@@ -289,10 +293,6 @@ La fonction connect est utilisé par le client pour se connecter à un serveur.
 * addrlen : sizeof(struct sockaddr).
 * Retourne 0 si ok, -1 sinon.
 
-
-La première chose à faire pour créer une communication grâce aux sockets est
-d'appelé la fonction `socket`. Cette fonction va créer le canal de communication
-et retourne un descripteur ou -1 si il y a erreur.
 
 ```C
 int bind(int sockfd, const struct sockaddr * addr, socklen_t addrlen);
