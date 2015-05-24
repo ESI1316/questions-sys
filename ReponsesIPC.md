@@ -324,50 +324,14 @@ int accept(int sockfd, struct sockaddr * addr, socklen_t * addrlen);
 ```
 
 La fonction `accept` est utilisé par un serveur pour retourner la prochaine
-connexion d'un client. Cette fonction retourne, si elle réussit, le descripteur
+connexion d'un client. Cette fonction attend une connexion, le processus est
+donc en attente d'une connexion. Cette fonction retourne, si elle réussit, le descripteur
 du socket du client ayant effectué la connexion sur le serveur.
 
 * sockfd : le descripteur retourné par la fonction `socket()`
 * addr : contient l'adresse IP et le port du `client`
 * addrlen : sizeof(struct sockaddr)
 
-Si on veut que le serveur puisse gérer plusieurs connexions, il faut faire,
-après la fonction `listen()`, une boucle infinie avec la fonction accept, et un
-fork pour chaque connexion.
-
-```C
-listen(sockfd, 5);
-while(1)
-{
-	newsockfd = accept(sockfd, (struct sockaddr *) &addr, sizeof(struct
-	sockaddr);
-
-	if (newsockfd < 0)
-	{
-		perror("Error on accept");
-		exit(1);
-	}
-
-	pid = fork();
-	if (pid < 0)
-	{
-		perror("Error on fork");
-		exit(1);
-	}
-	else if (pid == 0)
-	{	
-		close(sockfd);
-		/* Processus client */
-		// Do something
-		exit(0);
-	}
-	else
-	{	
-		// Pas sur ici.. à vérifier.
-		close(newsockfd);
-	}
-}
-```
 
 
 #### Utilisation de l'appel système pipe et situations d'interblocages : expliquez en vous basant sur des exemples de code comment une telle situation peut être obtenue. Détaillez et faites le lien avec les appels système Up et Down.
@@ -410,5 +374,42 @@ D'autres dérivées sont disponibles pour les différents type d'entier :
 #### (socket) Comment écrire une application client / serveur où plusieurs clients peuvent être connectés au serveur en même temps ? 
 
 
+Si on veut que le serveur puisse gérer plusieurs connexions, il faut faire,
+après la fonction `listen()`, une boucle infinie avec la fonction accept, et un
+fork pour chaque connexion.
+
+```C
+listen(sockfd, 5);
+while(1)
+{
+	newsockfd = accept(sockfd, (struct sockaddr *) &addr, sizeof(struct
+	sockaddr);
+
+	if (newsockfd < 0)
+	{
+		perror("Error on accept");
+		exit(1);
+	}
+
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("Error on fork");
+		exit(1);
+	}
+	else if (pid == 0)
+	{	
+		close(sockfd);
+		/* Processus client */
+		// Do something
+		exit(0);
+	}
+	else
+	{	
+		// Pas sur ici.. à vérifier.
+		close(newsockfd);
+	}
+}
+```
 
 
