@@ -69,6 +69,8 @@ int main()
 
 #### Expliquez la réalisation d'une section critique via "BTS", "alternance" et via "sémaphores de Dijkstra". Détaillez les appels système Down et up. Comparez ces trois approches.
 
+\newpage
+
 #### semget(), semctl(), semop() : Quelle est l'utilité ? Quels sont les arguments ? Quelle est la valeur de retour ? Etablissez le lien entre ces appels système et ceux vus en théorie (up() et down())
 
 ##### semget
@@ -81,12 +83,34 @@ int main()
 int semget(key_t key, int nsems, int semflg);
 ```
 
-L’appel système `semget()` retourne l’identifieur du set de sémaphore associé à la clé passée en paramètre (`key_t key`). Un nouveau set de `nsems` est créé si la clé a la valeur `IPC_PRIVATE` ou si aucun set de sémaphore n’est associé avec la clé et `IPC_CREAT` est spécifié dans `semflg`.
 
-Si `semflg` spécifie `IPC_CREAT` et `IPC_EXCL` et que le set de sémaphore existe, `semget()` échoue et met `EEXIST` dans `errno`.
+L'appel système `semget()` retourne l'identifieur du set de sémaphore associé à
+la clé passée en paramètre.
+`sem : Map<clé, identifiant>; tab_set : Map<identifiant, set_sema>`
 
-Note : `IPC_PRIVATE` n’est pas un flag mais une clé (`key_t`). Si cette valeur spéciale est utilisée, l’appel système ignore tout sauf les 9 derniers bits significatifs de `semflg` et crée un nouveau set de sémaphore. Ceci permet de s’assurer qu’un autre processus n’utilisera pas la même clé.
+key :
 
++ `IPC_PRIVATE`
++ une clé manuelle(risque qu'elle soit déjà prise)
+
+nsems :
+
++ Le nombre de sémaphores du set
+
+semflg :
+
++ `IPC_CREAT`
++ `IPC_EXCL`
+
+Si `semflg` spécifie `IPC_CREAT` et `IPC_EXCL` et que le set de sémaphore existe, 
+`semget()` échoue et met `EEXIST` dans `errno`.
+
+Note : `IPC_PRIVATE` n’est pas un flag mais une clé (`key_t`). Si cette valeur 
+spéciale est utilisée, l’appel système ignore tout sauf les 9 derniers bits 
+significatifs de `semflg` et crée un nouveau set de sémaphore. Ceci permet de 
+s’assurer qu’un autre processus n’utilisera pas la même clé.
+
+`semget(IPC_PRIVATE, 3, IPC_CREAT | 0666);` 9 bits = 0666 = 110110110b
 
 ##### semctl
 
