@@ -4,6 +4,67 @@
 
 #### Expliquez le mécanisme du producteur-consommateur. Détaillez-en le principe, le code, les appels système liés.
 
+On va créer deux sémaphores distinct : un pour bloquer/liberer la production et
+un pour bloquer/liberer la consommation. Ceux-ci seront des quantités de
+"ressource disponible".
+
+```
+Ensemble des ressources disponible comme étant un tableau, entièrement vide.
+---------------------------------------------------------
+| 		|		|		|		|		|		| 		|
+| 		|		|		|		|		|		|	    |
+---------------------------------------------------------
+```
+
+Le sémaphore de la production possède n nombre de chose à produire. Il va donc
+prendre une ressource `down(prod)`ce qui va rendre le producteur bloqué si le
+nombre de case n'est plus positif et attendre qu'un consommateur va libèrer une
+case.
+
+De même, le lecteur va lire et si la quantité de produit, commencant à 0, est
+nulle, il va attendre producteur ajoutera une ressouce. 
+
+Le producteur va réguler l'arrivage de case remplie du lecteur et le consommateur
+va réguler l'arrivage de case vide du producteur.
+
+```C
+#define QUANTITE 5
+
+typedef char produit;
+
+int main()
+{
+	int tete = 0;
+	int queue = 0;
+	tab produit[QUANTITE];
+	/*
+	*
+	* VARIABLES A PARTAGER
+	*/
+	int s = semget();
+	semctl(s, ...);
+
+	if (fork() == 0)
+	{
+		while(1)
+		{
+			down(conso);
+			// cool j'ai une ressource
+			up(libre);
+		}
+
+		exit(EXIT_SUCCESS);
+	}
+
+	while(1)
+	{
+
+	}
+	
+	exit(EXIT_SUCCESS);
+}
+```
+
 #### Expliquez la réalisation d'une section critique via "variable partagée", "blocage des interruptions" et via "sémaphores de Dijkstra". Détaillez les appels système Down et Up. Comparrez ces trois approches.
 
 #### Expliquez la réalisation d'une section critique via "BTS", "alternance" et via "sémaphores de Dijkstra". Détaillez les appels système Down et up. Comparez ces trois approches.
