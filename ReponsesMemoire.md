@@ -167,4 +167,24 @@ Si une page n'est pas en mémoire, voici les solutions possibles :
 Il existe également un démon de pagination qui libère les pages peu utilisées à
 intervalles réguliers pour limiter les defauts de page.
 
+## brk() et sbrk()
+
+```C
+#include <unistd.h>
+int brk(const void *endds);
+void *sbrk(int incr);
+```
+
+Les deux appels permettent de changer la taille du processus. L’adresse manipulée 
+par les deux appels est la première adresse qui est en dehors du processus. 
+
++ Augmentations de la taille du processus avec des appels `sbrk` et on utilise 
++ adresses retournées par `sbrk` pour les appels `brk` pour réduire la taille 
+du processus. 
+
+On utilisera de préférence pour les appels `sbrk` des valeurs de `incr` qui sont 
+des multiples de la taille de page. Le système réalisant des déplacement du 
+point de rupture par nombre entier de  pages (ce qui est logique dans un système 
+de mémoire paginé. A ne pas utiliser en conjonction avec les fonctions 
+d’allocation standard malloc, calloc, realloc, free.
 
