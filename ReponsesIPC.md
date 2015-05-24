@@ -196,6 +196,180 @@ un `SIGALRM` après sec secondes.
 
 #### socket(), bind(), listen(), accept(), connect() : Quelle est l'utilité ? Quels sont les arguments ? Quelle est la valeur de retour ? 
 
+Les structures utilisées pour les sockets :
+
+* `sockaddr` comprend les information sur le socket lui-même.
+
+```C
+struct sockaddr 
+{
+	unsigned short sa_family; // AF_INET, AF_UNIX, AF_NS, AF_IMPLINK
+	char sa_data[14]; 		  // adresse
+}
+```
+
+```C
+struct sockaddr_in
+{
+	short int sin_family;  // Comme sa_family de sockaddr
+	unsigned short int sin_port; // Le port (Network Byte Order)
+	struct in_addr sin_addr; // L'adresse (Network bye Order)
+	unsigned char sin_zero[8]; // Pas utilisé, mettre à NULL
+}
+```
+
+```C
+struct in_addr
+{
+	unsigned long s_addr; // L'adresse (Network Byte Order)
+}
+```
+
+Les fonctions pour manipuler les adresses IP :
+
+```C
+int inet_aton(const char * str, struct in_addr * adrr);
+in_addr_t inet_addr(const char * str);
+char * inet_ntoa(struct in_addr inaddr);
+```
+
+* inet_aton convertit une chaîne (en notation pointé) en une adresse en NBO.
+  L'adresse sera stocké dans la structure in_addr. Retourne 1 si la chaîne était
+  valide, 0 sinon.
+
+* inet_addr convertit une chaîne (notation pointé) en entier (NBO). Retourne
+  l'adresse si la chaîne est valide.
+
+* inet_ntoa convertit une adresse en network byte order en une chaîne en
+  notation pointée. (inverse de inet_addr et inet_aton)
+
+Exemple : 
+
+```C
+	struct sockaddr_in dest;
+	dest.sin_addr.s_addr = inet_addr("68.178.157.132");
+```
+
+
+Les sockets permettent la communication entre deux process qui se trouvent sur
+deux machines différentes, dans cette commnication, il y aura un serveur et un
+ou plusieurs client. C'est toujours le client qui demande la connexion au
+serveur. Les sockets établissent un canal de communication entre deux process de
+la même manière qu'un pipe. Ils ne font que retransmettre les données. Ils sont
+identifiés à l'aide d'un entier (d'un descripteur).
+
+Le serveur et le client doivent chacun avoir un socket. Le socket du serveur
+permet d'écouter l'arrivée d'un client. Le socket d uclient permet de
+s'identifier. Si le client désire envoyer de l'information au serveur, il les
+envoie via l'appel système `write` en donnant comme premier paramètre le handle
+du serveur. Le serveur lui utilisera l'appel système `read` avec comme handle le
+socket du client. Pour fermer un socket, on le ferme avec `close`.
+
+```C
+#include <sys/types.h>
+#include <sys/socket.h>
+int socket(int family, int type, int protocol);
+```
+
+* family : on utilise AF_INET ou PF_INET dans le cadre du cours (IPv4
+  protocols).
+* type : Le type de socket : SOCK_STREAM dans le cadre du cours.
+* protocol : Protocole utilisé, on utilise 0 dans le cadre du cours (protocole
+  par défaut).
+
+```C
+int connect(int sockfd, struct sockaddr * serv_addr, int addrlen);
+```
+
+La fonction connect est utilisé par le client pour se connecter à un serveur.
+
+* sockfd : le descripteur retourné par la fonction socket.
+* serv_addr : l'adresse de la structure sockaddr qui contient l'adresse IP et
+  port. Ceci est l'adresse du serveur.
+* addrlen : sizeof(struct sockaddr).
+* Retourne 0 si ok, -1 sinon.
+
+
+La première chose à faire pour créer une communication grâce aux sockets est
+d'appelé la fonction `socket`. Cette fonction va créer le canal de communication
+et retourne un descripteur ou -1 si il y a erreur.
+
+```C
+int bind(int sockfd, const struct sockaddr * addr, socklen_t addrlen);
+```
+
+La fonction `bind` est utilisé par le serveur pour assigner une adresse à un
+socket. `bind` assigne l'adresse spécifiée par la structure `sockaddr` au
+socket spécifié par le descripteur `sockfd` qui est le descripteur retourné par
+la fonction `socket`
+
+```C
+int listen(int sockfd, int backlog);
+```
+
+La fonction listen est utilisée par un processus serveur pour marqure le socket
+comme socket passif, c'est à dire que le socket sera utilisé pour accepter toute
+connexion entrante en utilisant la fonction `accept()`. `listen()` ne permet pas
+encore d'accepter les connexions, cette fonction met simplement le socket en
+mode "écoute".
+
+* sockfd : le descripteur du socket retourné par `socket()`
+* backlog : Le nombre maximum de connexions en attentes pour le socket. Si un
+  client essaye de se connecter quand la file d'attente est complète, il se peut
+  qu'il reçoive une erreur.
+* Retourne 0 si ok, -1 sinon.
+
+```C
+int accept(int sockfd, struct sockaddr * addr, socklen_t * addrlen);
+```
+
+La fonction `accept` est utilisé par un serveur pour retourner la prochaine
+connexion d'un client. Cette fonction retourne, si elle réussit, le descripteur
+du socket du client ayant effectué la connexion sur le serveur.
+
+* sockfd : le descripteur retourné par la fonction `socket()`
+* addr : contient l'adresse IP et le port du `client`
+* addrlen : sizeof(struct sockaddr)
+
+Si on veut que le serveur puisse gérer plusieurs connexions, il faut faire,
+après la fonction `listen()`, une boucle infinie avec la fonction accept, et un
+fork pour chaque connexion.
+
+```C
+listen(sockfd, 5);
+while(1)
+{
+	newsockfd = accept(sockfd, (struct sockaddr *) &addr, sizeof(struct
+	sockaddr);
+
+	if (newsockfd < 0)
+	{
+		perror("Error on accept");
+		exit(1);
+	}
+
+	pid = fork();
+	if (pid < 0)
+	{
+		perror("Error on fork");
+		exit(1);
+	}
+	else if (pid == 0)
+	{	
+		close(sockfd);
+		/* Processus client */
+		// Do something
+		exit(0);
+	}
+	else
+	{	
+		// Pas sur ici.. à vérifier.
+		close(newsockfd);
+	}
+}
+```
+
+
 #### Utilisation de l'appel système pipe et situations d'interblocages : expliquez en vous basant sur des exemples de code comment une telle situation peut être obtenue. Détaillez et faites le lien avec les appels système Up et Down.
 
 Soient deux processus p1 et p2 et deux tubes t1 et t2.
@@ -215,6 +389,23 @@ va ECRIRE ... \texttt{OUROBORS}
 ## Questions secondaires
 
 #### (socket) Quelle est l'utilité de la fonction htons() ? Comment faire parvenir un message à un processus qui s'exécute sur un autre ordinateur ? 
+
+Tous les ordinateurs ne stock pas les bytes dans le même ordre (little endian,
+big endian).
+
+Pour permettre aux machines de communiquer entre elles, on utilise une
+convention nommé Network Byte Order. Toutes les adresses et port contenus dans
+les structures doivent être en NBO.
+
+```C
+unsigned short htons(unsigned short hostshort);
+```
+La fonction `htons` convertit une adresse (short) en network byte order (short).
+D'autres dérivées sont disponibles pour les différents type d'entier : 
+
+* htonl : même chose que htons mais pour des long
+* ntohs : inverse de htons
+* ntohl : inverse de htonl
 
 #### (socket) Comment écrire une application client / serveur où plusieurs clients peuvent être connectés au serveur en même temps ? 
 
