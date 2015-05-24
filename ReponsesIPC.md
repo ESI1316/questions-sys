@@ -122,10 +122,19 @@ s’assurer qu’un autre processus n’utilisera pas la même clé.
 int semctl(int semid, int semnum, int cmd, ...);
 ```
 
-`semctl()` exécute l’opération spécifiée par `cmd` sur le set de sémaphore identifié par `semid`, ou sur le `semnum`e élément de ce set.
+`semctl()` exécute l’opération spécifiée par `cmd` sur le set de sémaphore 
+identifié par `semid`.
 
+Il est possible de spécifié l'indice d'un seul sémaphore de ce set via `semnum`.
+
+cmd :
+
++ `SET_VAL`  : initialise la valeur arg.val d'un semaphore du set
++ `IPC_STAT` : statistique
 + `IPC_SET`  : initialise les valeurs des sémaphores du set.
-+ `IPC_RMID` : supprime immédiatement le set de sémaphore, réveillant tous les processus bloqués par un appel `semop` sur le set.
++ `IPC_RMID` : supprime immédiatement le set de sémaphore, réveillant tous les 
+processus bloqués par un appel `semop` sur le set.
++ \dots
 
 ##### semop
 
@@ -137,7 +146,10 @@ int semctl(int semid, int semnum, int cmd, ...);
 int semop(int semid, struct sembuf *sops, unsigned nsops);
 ```
 
-`semop()` effectue des opérations sur les sémaphores sélectionnés du set de sémaphore identifié par `semid`. Chacun des `nsops` éléments du tableau pointé par `sops` définit une opération à effectuer sur un unique sémaphore. Les éléments de cette structure sont de type `struct sembuf`, qui contient :
+`semop()` effectue des opérations sur les sémaphores sélectionnés du set de 
+sémaphore identifié par `semid`. Chacun des `nsops` éléments du tableau pointé 
+par `sops` définit une opération à effectuer sur un unique sémaphore. Les 
+éléments de cette structure sont de type `struct sembuf`, qui contient :
 
 ```C
 unsigned short sem_num;  /* semaphore number */
@@ -145,8 +157,13 @@ short          sem_op;   /* semaphore operation */
 short          sem_flg;  /* operation flags */
 ```
 
-L’ensemble des opérations contenues dans `sops` est exécutée dans l’ordre du tableau et sont atomiques, ce qui implique que toutes les opérations sont exécutées comme une unité, ou aucune.
-Cet appel est donc différent d’appeler 2 fois `down()` ou `up()`, ceux-ci ne travaillant que sur le premier sémaphore du set, et n’étant pas atomiques.
+`nsops`== nombre d'actions `sops` à effectuer puisqu'il s'agit d'un tableau.
+
+L’ensemble des opérations contenues dans `sops` est exécutée dans l’ordre du 
+tableau et sont atomiques, ce qui implique que toutes les opérations sont 
+exécutées comme une unité, ou aucune.
+Cet appel est donc différent d’appeler 2 fois `down()` ou `up()`, ceux-ci ne 
+travaillant que sur le premier sémaphore du set, et n’étant pas atomiques.
 
 \newpage
 
