@@ -2,15 +2,15 @@
 
 ## Questions principales 
 
-### Expliquez le mécanisme du producteur-consommateur. Détaillez-en le principe, le code, les appels système liés.
+#### Expliquez le mécanisme du producteur-consommateur. Détaillez-en le principe, le code, les appels système liés.
 
-### Expliquez la réalisation d'une section critique via "variable partagée", "blocage des interruptions" et via "sémaphores de Dijkstra". Détaillez les appels système Down et Up. Comparrez ces trois approches.
+#### Expliquez la réalisation d'une section critique via "variable partagée", "blocage des interruptions" et via "sémaphores de Dijkstra". Détaillez les appels système Down et Up. Comparrez ces trois approches.
 
-### Expliquez la réalisation d'une section critique via "BTS", "alternance" et via "sémaphores de Dijkstra". Détaillez les appels système Down et up. Comparez ces trois approches.
+#### Expliquez la réalisation d'une section critique via "BTS", "alternance" et via "sémaphores de Dijkstra". Détaillez les appels système Down et up. Comparez ces trois approches.
 
-### semget(), semctl(), semop() : Quelle est l'utilité ? Quels sont les arguments ? Quelle est la valeur de retour ? Etablissez le lien entre ces appels système et ceux vus en théorie (up() et down())
+#### semget(), semctl(), semop() : Quelle est l'utilité ? Quels sont les arguments ? Quelle est la valeur de retour ? Etablissez le lien entre ces appels système et ceux vus en théorie (up() et down())
 
-#### semget
+##### semget
 
 ```C
 #include <sys/types.h>
@@ -27,7 +27,7 @@ Si `semflg` spécifie `IPC_CREAT` et `IPC_EXCL` et que le set de sémaphore exis
 Note : `IPC_PRIVATE` n’est pas un flag mais une clé (`key_t`). Si cette valeur spéciale est utilisée, l’appel système ignore tout sauf les 9 derniers bits significatifs de `semflg` et crée un nouveau set de sémaphore. Ceci permet de s’assurer qu’un autre processus n’utilisera pas la même clé.
 
 
-#### semctl
+##### semctl
 
 ```C
 #include <sys/types.h>
@@ -42,7 +42,7 @@ int semctl(int semid, int semnum, int cmd, ...);
 + `IPC_SET`  : initialise les valeurs des sémaphores du set.
 + `IPC_RMID` : supprime immédiatement le set de sémaphore, réveillant tous les processus bloqués par un appel `semop` sur le set.
 
-#### semop
+##### semop
 
 ```C
 #include <sys/types.h>
