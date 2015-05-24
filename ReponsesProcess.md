@@ -4,8 +4,16 @@
 
 #### Un processus effectue un fork(). Quel est le rôle de la table des interruptions, de la table des processus, de l'ordonnanceur, de l'OS dans ce cas ?
 
-+ Table des interruptions : ?
-+ Table des processus : ?
++ Table des handles : La table des handles est copié du père au fils.
++ Table des interruptions : Le fils hérite d'une copie des fonctions associées
+  aux signaux du père. Cependant les signaux en attente sont évidemment
+  supprimé. Il faut préciser que lors d'un appel à une fonction `exec`, les
+  fonctions associées aux signaux du process sont remises par défaut sauf pour
+  les signaux ignorés, ces derniers sont préservés.
+
++ Table des processus : Dans la table des processus, l'entrée du père est copiée
+  avec tout son contexte pour créer le processus fils.
+
 + Ordonnanceur : ?
 + OS : ?
 
