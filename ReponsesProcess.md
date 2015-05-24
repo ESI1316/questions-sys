@@ -23,21 +23,93 @@
 
 #### wait(), wait4() : Quelle est l'utiité ? Arguments ? Valeur de retour ?
 
+```C
+pid_t wait(int * status);
+pid_t waitpid(pid_t pid, int * status, int options);
+pid_t wait3(int * status, int options, struct rusage * rusage);
+pid_t wait4(pid_t pid, int * status, int options, struct rusage * rusage);
+```
+
+Toutes ces fonctions attendent que un ou plusieurs process changent d'état.
+C'est à dire : 
+
+* Un process enfant se termine
+* Un process enfant est stoppé par un signal
+* Un process enfant reprend son cours suite à un signal.
+
+Dans le cas où le fils se termine, un wait permet au système de libérer les
+ressources associées au process fils. Si le wait n'est pas effectué, le process
+fils sera zombie (voir question zombie).
+
+wait3 et wait4 sont comme waitpid mais retournent une structure `rusage` qui
+donne des information sur l'utilisation des ressources dans le process fils.
+
+wait3() et wait4() sont marqués comme deprecated dans le manuel, il faut
+utiliser waitpid() à la place.
+
+* wait attend qu'un de ses fils se termine.
+* waitpid attend qu'un de ses fils spécifié par pid se termine.
+	+ si pid = -1 : attend n'importe quel fils.
+	+ si pid = 0 : attend n'importe quel fils ayant le même group ID que le
+	  père.
+	+ si pid > 0 : attend le fils dont son pid est égal au pid spécifié.
+	+ options :
+		- WNOHANG : retourne immédiatement si aucun fils n'est fini.
+	+ status : si non NULL : stocke la valeur de retour du process, cette valeur
+	  de retour peut être consulté grâce à des macro (voir man 2 wait)
+
+* wait3 attend pour tous les fils.
+* wait4 attend pour un ou plusieurs fils spécifié.
+* Si rusage n'est pas NULL, rusage contiendra des informations sur le fils.
+* waitpid fait tout.
+* Valeur de retour : 
+	+ wait : PID du fils terminé, -1 si erreur.
+	+ waitpid : PID du fils dont l'état a changé. SI WNOHANG est spécifié et que
+	  plusieurs fils sont spécifié mais n'ont pas encore changé d'état, alors 0
+	  est retourné. -1 si erreur.
+	+ wait3 et wait4 retourne comme waitpid.
+
+Ces codes suivant sont égaux : 
+
+```C 
+wait3(&status, options, rusage);
+waitpid(-1, &status, options);
+wait(&status);
+```
+
+Ainsi que ces deux codes ci :
+
+```C
+wait4(pid, &status, options, rusage);
+waitpid(pid, &status, options);
+```
+
 Wait(&status) appelle waitpid de cette manière :
 
 ```C
 waitpid(-1, &status, NULL);
 ```
 
-Ce dernier "attend la fin de n'importe lequel de ses fils".
 
-+ wait4 : attend un fils spécifique
-+ wait3 : attend n'importe lequel de ces fils
-Dans les deux cas, un paramètre 
+Quelques champs utiles de rusage (man getrusage pour la liste complète) :
 ```C
 struct rusage
+{
+	struct timeval ru_utime; // user CPU time used
+	struct timeval ru_stime; // system CPU time used
+	long ru_nsignals; // signals received
+	long ru majflt; // page fault
+	long ru_minflt; // page reclaims;
+	etc.
+}
 ```
-peut être passé en paramètre, celui-ci est rempli des informations du fils.
+
+Exemple : attend tous les fils
+
+```C
+while(wait(&status) > 0);
+while(waitpid(-1, &status, 0) > 0);
+```
 
 \newpage
 
