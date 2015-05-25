@@ -139,6 +139,15 @@ section critique. Le gros inconvénient de ce système est donc l'attente active
 d'un process, l'effet est encore plus présent si la section critique d'un des
 deux process est beaucoup plus longue que l'autre.
 
+* BTS (question suivante) : BTS (Bit Test and Set) est une instruction atomique
+  pour tester et modifier une variable. Cette instruction va
+  bloquer le bus mémoire pour empêcher tout process d'accéder à la variable
+  pendant qu'elle est testée/modifiée. Bloquer la mémoire est différent de
+  désactiver les interruptions : en effet, sur une machine multi-process,
+  bloquer les interruptions bloque seulement un CPU. La seule manière est donc
+  de bloquer l'accès à la mémoire. Cette solution possède toujours le problème
+  d'attente active.
+
 #### Expliquez la réalisation d'une section critique via "BTS", "alternance" et via "sémaphores de Dijkstra". Détaillez les appels système Down et up. Comparez ces trois approches.
 
 \newpage
