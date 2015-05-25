@@ -67,6 +67,78 @@ int main()
 
 #### Expliquez la réalisation d'une section critique via "variable partagée", "blocage des interruptions" et via "sémaphores de Dijkstra". Détaillez les appels système Down et Up. Comparrez ces trois approches.
 
+Une section critique est une partie de code où un process accède à une ressource
+partagée, ce qui peut entrainer des accès concurrent. On a donc besoin d'une
+exclusien mutuelle pour être sur qu'un process ne s'approprie pas une ressource
+déjà utilisée par un autre process. Il existe différentes techniques, toutes
+ayant leur défauts et avantages, pour réaliser cette exclusion.
+
+Il faut ces 4 conditions pour assurer une exclusion mutuelle :
+
+* Deux process ne peuvent pas être en section critique en même temps.
+* Le nombre de CPU n'a pas d'importance.
+* Aucun process ne peut bloquer un autre process s'il n'est pas dans sa section
+  critique.
+* Aucun process ne doit attendre indéfiniment pour entrer dans sa région
+  critique.
+
+##### Exclusions mutuelles avec attente active
+
+* Désactiver les interruptions : C'est une des solutions les plus simples à
+  réaliser. Cepandant, elle n'est absolument pas recommandée pour les process
+  utilisateurs car un process pourrait ne pas réactiver les interruptions. De
+  plus sur les machines multi-processeurs, désactiver les interruptions
+  n'affecte qu'un seul CPU.
+
+* Variables partagées : le principe est d'avoir une variable en mémoire
+  partagée, avec une valeur initialement à 0. Quand un process entre dans sa
+  région critique, il teste la variable, si elle est à 0, il la set à 1 et entre
+  sa région critique. Un autre process aura juste à attendre que cette variable
+  redevienne 0. Le problème de cette technique est qu'une interruption peut se
+  produire entre le test et la modification de la variable. Imaginons qu'un
+  process test la variable, cette dernière vaut 0, une interruption survient et
+  un autre process prend la main, test également cette variable, la met à 1 et
+  entre dans sa région critique. Quand le premier process à la main, il met
+  aussi la variable à 1 et entre dans sa région critique en même temps que le
+  deuxième process.
+
+* Alternance (question suivante) : Cette solution est plus sécurisée que la
+  solution avec les variables partagées, cependant elle possède trop d'attente
+  active.
+
+  ```C
+ 	// Process A :
+	
+	while(TRUE)
+	{
+		while(turn != 0); 
+		critical_region();
+		turn = 1;
+		noncritical_region();
+	}
+
+	// Process B : 
+
+	while(TRUE)
+	{
+		while(turn != 1);
+		critical_region();
+		turn = 0;
+		noncritical_region();
+	}
+  ```
+
+Ici, la variable turn garde en mémoire partagée "à qui est le tour" d'entrer
+dans sa section critique. Dans l'exemple, si turn vaut 0, c'est au tour de A, si
+turn vaut 1, c'est au tour de B. Si le process A test turn et que turn vaut 0,
+il entre dans sa région critique. Le process B quant à lui, si turn vaut 0, il
+sera mis en attente active (boucle) jusqu'à ce qu'il perde la main. On a donc
+une perte de temps inutile. Quand le process A quitte sa section critique, il
+met la variable d'alternance à 1 pour permettre au process B d'entrer dans sa
+section critique. Le gros inconvénient de ce système est donc l'attente active
+d'un process, l'effet est encore plus présent si la section critique d'un des
+deux process est beaucoup plus longue que l'autre.
+
 #### Expliquez la réalisation d'une section critique via "BTS", "alternance" et via "sémaphores de Dijkstra". Détaillez les appels système Down et up. Comparez ces trois approches.
 
 \newpage
