@@ -24,6 +24,7 @@ typedef struct shared {
 	int head;
 	int queue;
 	char produits[QUANTITY];
+	int remaining;
 } shared;
 
 /**
@@ -128,7 +129,7 @@ int main()
 	int memId = -1; 	// Id pour la mémoire partagée.
 	int semSet = -1; 	// Id du set de sémaphore partagé.
 	shared * data = NULL; 	// Zone mémoire partagée.
-	
+
 	/**
 	 * - Création d'un set de deux sémaphores
 	 * - Initialisation du premier sémaphore appellé SEM_PROD avec QUANTITY
@@ -136,13 +137,16 @@ int main()
 	 * - Initialisation du second sémaphore appellé SEM_CONS avec 0 ressources
 	 *   disponibles.
 	 */
-	if ((semSet = semget(IPC_PRIVATE, 2, IPC_CREAT | 0666)) == -1)
+	//if ((semSet = semget(IPC_PRIVATE, 2, IPC_CREAT | 0666)) == -1)
+	if ((semSet = semget(IPC_PRIVATE, 3, IPC_CREAT | 0666)) == -1)
 		exit_error("semget error");
 	if (semctl(semSet, SEM_PROD, SETVAL, QUANTITY) == -1)
 		exit_error("semctl prod");
 	if (semctl(semSet, SEM_CONS, SETVAL, 0) == -1)
 		exit_error("semctl cons");
-	
+	if (semctl(semSet, 2, SETVAL, 1) == -1)
+		exit_error("semctl remaining");
+
 	/**
 	 * - Création d'une zone mémoire pour une structure shared
 	 * - Attachement de la mémoire partagée fraichement créée.
@@ -156,16 +160,57 @@ int main()
 	data->head 	= 0; 
 	data->queue = 0;
 	data->produits[data->head] = '\0';
+	data->remaining = 10;
+
+	if(fork() == 0)
+	{
+		//for(int i = 0; i < QUANTITY; i++)
+		while(1)
+		{
+			down(semSet, 2);
+			if (data->remaining > 0)
+			{
+				down_consommable(semSet); // Y a t il au moins un consommable ?
+				printf("Fils %d : Char : %c \n",getpid(), data->produits[data->head]);
+				data->head = (data->head+ 1) % QUANTITY;
+				data->remaining--;
+				up_empty(semSet); // Y'a une case vide en plus maintenant.
+				up(semSet, 2);
+			}
+			else
+			{
+				up(semSet, 2);
+				break;
+			}
+		}
+
+		if (shmdt(data) == -1) // Détachement de la zone mémoire partagée (FILS)
+			exit_error("shmdt error");
+
+		exit_success("End of forked process");
+	}
 
 	if(fork() == 0) // FILS CONSOMMATEUR
 	{
-		for(int i = 0; i < QUANTITY; i++)
+		//for(int i = 0; i < QUANTITY; i++)
+		while(1)
 		{
-			down_consommable(semSet); // Y a t il au moins un consommable ?
-			printf("Char : %c \n", data->produits[data->head]);
-			data->head = (data->head+ 1) % QUANTITY;
-			up_empty(semSet); // Y'a une case vide en plus maintenant.
-			sleep(1);
+			down(semSet, 2);
+			if (data->remaining > 0)
+			{
+				down_consommable(semSet); // Y a t il au moins un consommable ?
+				printf("Fils %d : Char : %c \n",getpid(), data->produits[data->head]);
+				data->head = (data->head+ 1) % QUANTITY;
+				data->remaining--;
+				up_empty(semSet); // Y'a une case vide en plus maintenant.
+				up(semSet, 2);
+				sleep(1);
+			}
+			else
+			{
+				up(semSet, 2);
+				break;
+			}
 		}
 
 		if (shmdt(data) == -1) // Détachement de la zone mémoire partagée (FILS)
@@ -180,9 +225,10 @@ int main()
 		data->produits[data->queue] = 'a' + i;
 		data->queue = (data->queue + 1) % QUANTITY;
 		up_consommable(semSet); // Voila c'est rempli !
+		sleep(1);
 	}
 
-	wait(NULL);
+	while (wait(NULL) > 0);
 
 	if (shmdt(data) == -1) // Detachement de la zone mémoire (PERE)
 		exit_error("shmdt error");
