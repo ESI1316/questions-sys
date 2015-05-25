@@ -4,6 +4,43 @@
 
 #### Décrivez en détail le principe et l'utilité de la segmentation. Comment ce principe est-il mis en oeuvre lors du fonctionnement en mode réel et protégé du processeur ?
 
+Le but de la segmentation est de séparer la mémoire en segments. Chaque segment est un espace d'adressage indépendant qui peut s'agrandir à l'exécution. Pour spécifier une adresse quand il y segmentation, il faut donner une adresse en deux parties, une partie donnant le numéro du segment et une autre donnant l'offset par rapport au début du segment. La segmentation apporte une nouvelle sécurité. Si une adresse dépasse l'offset d'un segment et qu'on essaye d'accéder à une zone mémoire hors du segment ou que le segment déborde sur un autre segment, une segmentation fault se produit.
+
+##### La segmentation avec pagination sous Intel x86
+
+En Intel x86, deux tables de descripteurs de segments sont présentes : 
+
+* La LDT (Local Descriptor Table) : chaque process possède une LDT, elle possède les descripteurs de segments des segments locaux au programme.
+* La GDT (Global Descriptor Table) : Elle est unique au système, elle décrit les segments du système.
+
+Pour accéder à un segment en x86, il faut d'abord charger un sélecteur de segment dans un registre de segment (CS, DS, SS, etc.). Pendant l'exécution d'un process, les registres de segments possèdent les sélecteurs de segments pour le process. Un sélecteur de segment fait 16 bits.
+
+```
+ -----------------------------------------------------------------------------
+ | 13 bits : index | 1 bit : 0 = GDT, 1 = LDT | 2 bits : protections (0 à 3) |
+ -----------------------------------------------------------------------------
+```
+
+* L'index est l'index dans la table des segments.
+* 1 bit, si celui-ci est 0, alors l'index est celui de la GDT, sinon c'est celui de la LDT.
+* 2 bits de protections allant d'une valeur de 0 à 3.
+
+Quand le sélecteur de segment est chargé, le descripteur correspondant dans une des deux tables est également lu et stocké dans un registre pour un accès rapide.
+
+Un descripteur de segment consiste en 8 bytes. Le descripteur contient :
+
+* L'adresse de base 
+* La limite (dernière adresse)
+* Bit de granularité : si 0, alors la limite est en bytes. Si 1, la limite est en pages. On utilise ce bit car la limite est seulement sur 20 bytes.
+* Un bit qui précise si le segment est en mémoire. 
+* Les bits de protections.
+* et d'autres champs.
+
+Grâce à ce descripteur, on peut donc accéder à une adresse linéaire (pas physique, car les segments sont également paginé, il faudra donc transformer cette adresse linaire en adresse physique grâce à la table des pages), cette adresse linéaire est l'adresse du segment et son offset.
+
+Les segments pouvant être de très grande taille, il est donc nécessaire de les paginer. Chaque segment contient sa propre table des pages elle même paginée. Dans le descripteur de segment, si le segment est en mémoire, on considère donc que table des pages l'est aussi, une fois l'adresse linéaire trouvée, on va donc transformer l'adresse linéaire en adresse physique.
+
+
 #### Décrivez en détail le principe et l'utilité de la pagination. 
 
 L'espace d'adressage d'un process est découpé en pages de taille fixe. Seules
