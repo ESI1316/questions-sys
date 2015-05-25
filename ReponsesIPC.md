@@ -148,7 +148,33 @@ deux process est beaucoup plus longue que l'autre.
   de bloquer l'accès à la mémoire. Cette solution possède toujours le problème
   d'attente active.
 
+* Sémaphores de Dijkstra : Dijkstra a introduit un nouveau type de variable : le
+  sémaphore. Un sémaphore est une variable qui compte le nombre de ressources
+  disponibles si le sémaphore est positif, et le nombre de process demandant la
+  ressource si le sémaphore est négatif. 
+  Il existe deux opérations sur les sémaphores : down et up.
+	+ down : test si le sémaphore est plus petit ou égal à 0, si c'est le cas,
+	  le process est mis à l'état bloqué, sinon il décrémente le sémaphore et
+	  entre dans sa section critique. Evidemment, tester et modifier la valeur
+	  du sémaphore est une opération atomique (voir BTS).
+	+ up : incrémente la valeur du sémaphore, si un ou plusieurs etaient à
+	  l'état bloqué après un down, un d'entre eux est choisi par l'ordonnanceur
+	  (si l'ordonnanceur garde une file, alors c'est le premier de la file qui
+	  est choisi).
+
+ Les sémaphores permettent de résoudre le problème du producteur/consommateur.
+ Down et up sont implémenté comme des appels système. Désactiver les
+ interruptions dans ce cas là est raisonnable car il ne s'agit que de quelques
+ microsecondes pour tester et modifier la variable si nécessaires.
+ Voir question producteur / consommateur pour plus d'informations.
+
+ Les sémaphores suppriment donc l'attente active, car un process passe à l'état
+ bloqué si son down ne lui permet pas de continuer.
+
+
 #### Expliquez la réalisation d'une section critique via "BTS", "alternance" et via "sémaphores de Dijkstra". Détaillez les appels système Down et up. Comparez ces trois approches.
+
+Voir question ci-dessus.
 
 \newpage
 
