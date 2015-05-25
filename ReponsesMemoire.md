@@ -40,6 +40,8 @@ Grâce à ce descripteur, on peut donc accéder à une adresse linéaire (pas ph
 
 Les segments pouvant être de très grande taille, il est donc nécessaire de les paginer. Chaque segment contient sa propre table des pages elle même paginée. Dans le descripteur de segment, si le segment est en mémoire, on considère donc que table des pages l'est aussi, une fois l'adresse linéaire trouvée, on va donc transformer l'adresse linéaire en adresse physique.
 
+(La suite à vérifier)
+En mode réel, les adresses font 20 bits, on peut donc avoir seulement 1Mb de mémoire adressable (2^20). En mode réel on peut accéder à n'importe quelle zone mémoire. Le mode réel n'est presque plus utilisé de nos jours, sauf au démarrage, car il est trop dangereux qu'un process puisse avoir accès à n'importe quelle zone mémoire d'un autre process. L'adresse physique en mode réel est : segment * 16 + offset.
 
 #### Décrivez en détail le principe et l'utilité de la pagination. 
 
