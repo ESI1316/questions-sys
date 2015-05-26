@@ -295,66 +295,6 @@ sur ext/ext2
 
 La réponse est présente dans la question principale sur EXT. + Dernière question
 sur ext/ext2
-## Questions secondaires 
-
-#### (FAT) Détaillez comment l'OS retrouve un fichier, ajoute des données à ce fichier, efface ce fichier
-
-Exemple pour retrouver un fichier : `int h = open("/home/user/f1", O_RDONLY);`
-
-* En FAT16 : Le cluster 0 contient la racine. Dans la liste des descripteurs
-  présent dans le répertoire racine, l'OS cherche un descripteur avec le nom
-  "user". Si il le trouve, il cherche le descripteur avec le nom "f1" dans
-  user. Dans le descripteur de f1, on a le premier cluster du fichier ainsi
-  que sa taille.
-  Les clusters suivant sont chainés et sont retrouvés grâce à la FAT.
-* En FAT32 : Même principe qu'en FAT16, sauf que le répertoire racine est
-  retrouvé grâce au MBR.
-
-Supprimer un fichier : On met 0 dans la FAT aux clusters correspondant au
-fichier.
-
-Ecrire dans un fichier : Il est très simple d'écrire dans un fichier, il suffit
-de changer le chainage en fat si on utilise de nouveaux clusters.
-
-#### (FAT) Détaillez les situations d'incohérence et montrer comment l'OS récupère cette situation.
-
-Lors d'un arrêt brutal du système, la FAT peut comporter des erreurs par rapport
-au contenu des clusters. Le système analyse le disque : 
-
-* Si la suite d'un fichier est un cluster vide, on remplace l'adresse par -1.
-* Si on trouve un cluster qui contient des données mais ne semble appartenir à
-  aucun fichier, et qu'il n'est pas libre. 
-
-#### (EXT2) Détaillez comment l'OS retrouve un fichier, ajoute des données à ce fichier, efface ce fichier.
-
-handle = open("/usr/home/d", O_RDONLY);
-
-+ / (root) == inode 2 	=> Numero de bloc 	28 
-+ bloc 28 => contient l'entrée "usr, inode 35"
-+ usr/ == inode 35 	=> Numero de bloc 64
-+ bloc 64 => contient l'entrée "home, inode 11"
-+ home/ == inode 11 	=> Numero de bloc 77
-+ bloc 77 => contient l'entrée "d, inode 45"
-+ d == inode 45, l'ensemble des blocs appartiennent au fichier "d".
-
-#### (EXT2) Détaillez les situations d'incohérence et montrer comment l'OS récupère cette situation
-
-Intégrité des liens hard : On parcourt tout le F.S, on regarde le nombre de
-liens dans l'inode d'un fichier et on compare avec le nombre de fichiers ayant
-cet inode. Si le compteur d'inode est incohérent, on le corrige.
-
-Fichier fantôme : fichier référencé dans un inode mais aucun fichier avec cet
-inode n'est référencé dans un répertoire.
-
-#### (EXT2) Détaillez le contenu d'un super-bloc et l'utilité des champs qui s'y trouvent
-
-La réponse est présente dans la question principale sur EXT. + Dernière question
-sur ext/ext2
-
-#### (EXT2) Détaillez le contenu d'un inode et l'utilité des champs qui s'y trouvent
-
-La réponse est présente dans la question principale sur EXT. + Dernière question
-sur ext/ext2
 
 #### (EXT2) Détaillez les appels système qui permettent d'utiliser le système de fichier (open, read, write, close, dir, dup, lseek, stat, ...) et comment l'OS implémente ces appels système (handle, TDFO, ...)
 
