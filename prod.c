@@ -236,7 +236,7 @@ int main()
 	if (shmctl(memId, IPC_RMID, 0) == -1) // Suppression de la zone mémoire.
 		exit_error("shmctl rm data");
 
-	if (semctl(semSet, SEM_PROD, IPC_RMID, 0) == -1) // Suppression du SET de semaphores
+	if (semctl(semSet, SEM_PROD, IPC_RMID) == -1) // Suppression du SET de semaphores
 		exit_error("semctl rm prod");
 
 	exit_success("End of father process");
