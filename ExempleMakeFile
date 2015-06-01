@@ -1,7 +1,7 @@
 CC = gcc
 FLAGS = -std=c89
 
-Run: executable
+Run: executable Demo
 	 ./Demo
 
 executable: fichier.o
