@@ -1,4 +1,10 @@
-# questions-sys
-Réponses aux questions théoriques SYS2
+# Questions théoriques SYS2
 
-Le repo contient encore des erreurs non corrigées mais qui le seront surement pour la seconde sess :D
+## Auteurs :
+
+* Florian Knop
+* Simon Placentino
+
+Des erreurs sont encore présentes. Vérifiez donc votre cours si vous n'êtes pas sûr.
+
+
