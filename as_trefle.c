@@ -108,6 +108,8 @@ int tokenize(char ** tokens, char * line, char * delimiter)
 
 	while(tokens[i] != NULL)
 		tokens[++i] = strtok(NULL, delimiter);
+
+	return i;
 }
 
 void prompt(char * buffer)

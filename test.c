@@ -1,37 +1,64 @@
-#define _POSIX_SOURCE
+#define _XOPEN_SOURCE
 
-#include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <wait.h>
-#include <signal.h>
+#include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
 #include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
 
-
-void infanticide(int sg)
+void sem_op(int sem, int sem_n, int op)
 {
-	printf("%s \n", "infanticide");
-	if(sg = SIGCHLD) while(waitpid(-1, NULL, WNOHANG) > 0);
+	struct sembuf operations;
+	operations.sem_num = sem_n;
+	operations.sem_op = op; // +1 -1
+	operations.sem_flg = 0;
+
+	semop(sem, &operations, 1);
 }
 
-void prpr(int p)
-{
-	printf("sigint \n");
-}
 int main()
-
 {
-	signal(SIGCHLD, infanticide);
-	signal(SIGINT, prpr);
 
-	if(fork() == 0) {
-		sleep(1);exit(0);
+	int semid = semget(IPC_PRIVATE, 1, IPC_CREAT | 0666);
+
+	int memid = shmget(IPC_PRIVATE, sizeof(int), IPC_CREAT | 0666);
+
+	int * i = (int *) shmat(memid, NULL, 0666);
+	semctl(semid, 0, SETVAL, 1);
+
+	if(fork() == 0)
+	{
+		sem_op(semid, 0, -1);
+		printf("%d \n", *i);
+		*i = *i + 1;
+		sem_op(semid, 0, 1);
+	}
+	if(fork() == 0)
+	{
+		sem_op(semid, 0, -1);
+		printf("%d \n", *i);
+		*i = *i + 1;
+		sem_op(semid, 0, 1);
+	}
+	if(fork() == 0)
+	{
+		sem_op(semid, 0, -1);
+		printf("%d \n", *i);
+		*i = *i + 1;
+		sem_op(semid, 0, 1);
+	}
+	if(fork() == 0)
+	{
+		sem_op(semid, 0, -1);
+		printf("%d \n", *i);
+		*i = *i + 1;
+		sem_op(semid, 0, 1);
 	}
 
-	kill(getpid(), SIGINT);
-
-
-	execlp("ls", "ls", "-l",  NULL);
-
-	exit(EXIT_SUCCESS);
+	shmdt(i);
+	return 0;
 }

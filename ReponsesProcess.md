@@ -126,7 +126,7 @@ pour en créer il suffit de faire un process vide :
 
 ```C
 if(pid_f=fork()==0);if(pid_f=fork()==0);if(pid_f=fork()==0);if(pid_f=fork()==0); 	
-// JaumainStyle quadruplette de process zombie.
+// JaumainStyle quadruplette de process
 ```
 
 Pour les détruire, il est possible de les attendre à un moment choisi dans le
@@ -150,16 +150,16 @@ if(fork() == 0);
 #### execve(), execl, execv, execlp : Quelle est l'utilité ? Arguments ? Valeur de retour ?  Quel est le rôle de la table des interruptions, de la table des processus, de l'ordonnanceur, de l'OS dans ce cas ?
 
 ```C
-execl(CHEMIN_COMMANDE, NOM_COMMANDE, argument, argument, ..., NULL);
+execl(CHEMIN_COMMANDE, argument_nom_commande, argument, ..., NULL);
 ```
 
 ```C
-execv(CHEMIN_COMMANDE, NOM_COMMANDE, arguments[argument, argument, ..., NULL]);
+execv(CHEMIN_COMMANDE, arguments[argument_nom_commande, argument, ..., NULL]);
 ```
 
 ```C
-execlp(NOM_FICHIER_COMMANDE, argument, argument, ..., NULL);
-execvp(NOM_FICHIER_COMMANDE, arguments[argument, argument, ..., NULL]);
+execlp(NOM_FICHIER_COMMANDE, argument_nom_commande, argument, ..., NULL);
+execvp(NOM_FICHIER_COMMANDE, arguments[argument_nom_commande, argument, ..., NULL]);
 ```
 
 Il est possible aussi d'utiliser execle, execve, execlpe, execvpe qui prennent
