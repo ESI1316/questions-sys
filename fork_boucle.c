@@ -30,11 +30,13 @@ int main()
 	int * i = (int *) shmat(memid, NULL, 0666);
 	semctl(semid, 0, SETVAL, 1);
 
+	*i = 0;
+
 	for(int j = 0; j < 3; j++)
 	{
 		if (fork() == 0){
 			sem_op(semid, 0, -1);
-			printf("%d \n", *i);
+			printf("%d :: %d \n", getpid(), *i);
 			*i = *i + 1;
 			sem_op(semid, 0, 1);
 		}

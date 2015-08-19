@@ -1,3 +1,12 @@
+/**
+ * Process 3 (le père), éffectuera un display_msg uniquement quand le process 1
+ * et 2 aura terminé. 
+ *
+ * Un set de deux sémaphores est donc utilisé.
+ *
+ * Ne pas oublier de liberer les ressources fork (waitpid) et de delete le set
+ * de sémaphores
+ */
 #define _XOPEN_SOURCE
 
 #include <unistd.h>
@@ -31,7 +40,7 @@ int main()
 
 	int pid1, pid2, sem;
 
-	if ((sem = semget(IPC_PRIVATE, 2, IPC_CREAT | 0666)) == -1)
+	if ((sem = semget(IPC_PRIVATE, 2, IPC_CREAT | 0666)) == -1) // Un set de 2 sem
 		exit_error("Erreur semget");
 
 	if (semctl(sem, SEM_UN, SETVAL, 0) == -1)
@@ -40,14 +49,8 @@ int main()
 	if (semctl(sem, SEM_DEUX, SETVAL, 0) == -1)
 		exit_error("erreur semctl 1");
 
-	struct sembuf up;
-	struct sembuf down;
-
-	up.sem_op = 1;
-	up.sem_flg = 0;
-
-	down.sem_op = -1;
-	down.sem_flg = 0;
+	struct sembuf up = {0, 1, 0}; // up.sem_op = 1; up.sem_flg = 0;
+	struct sembuf down = {0, -1, 0}; //	down.sem_op = -1; down.sem_flg = 0;
 
 
 	pid1 = fork();
