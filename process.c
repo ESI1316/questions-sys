@@ -30,7 +30,7 @@ void display_msg(char * message)
 {
 	for (int i = 0; i < 10; ++i)
 	{
-		printf("%s", message);
+		printf("%s :: %d \n", message, i);
 		sleep(1);
 	}
 }
@@ -52,12 +52,10 @@ int main()
 	struct sembuf up = {0, 1, 0}; // up.sem_op = 1; up.sem_flg = 0;
 	struct sembuf down = {0, -1, 0}; //	down.sem_op = -1; down.sem_flg = 0;
 
-
 	pid1 = fork();
-	if (pid1 == 0)
+	if (pid1== 0)
 	{
-		display_msg("Process 1\n");
-
+		display_msg("Process 1");
 		up.sem_num = SEM_UN;
 		semop(sem, &up, 1);
 		exit(EXIT_SUCCESS);
@@ -66,36 +64,34 @@ int main()
 	{
 		exit_error("Erreur fork pid1");
 	}
-	else
+
+	pid2 = fork();
+	if (pid2 == 0)
 	{
-		pid2 = fork();
-		if (pid2 == 0)
-		{
-			display_msg("Process 2\n");
-			up.sem_num = SEM_DEUX;
-			semop(sem, &up, 1);
-			exit(EXIT_SUCCESS);
-		}
-		else if (pid2 == -1)
-		{
-			exit_error("Erreur fork pid2");
-		}
-		else
-		{
-			down.sem_num = SEM_UN;
-			semop(sem, &down, 1);
-
-			down.sem_num = SEM_DEUX;
-			semop(sem, &down, 1);
-
-			display_msg("Process 3\n");
-
-			while (waitpid(-1, NULL, WNOHANG) > 0);
-
-			if ( semctl(sem, SEM_UN, IPC_RMID) == -1)
-				exit_error("Delete set sem");
-		}
+		display_msg("Process 2");
+		up.sem_num = SEM_DEUX;
+		semop(sem, &up, 1);
+		exit(EXIT_SUCCESS);
 	}
+	else if (pid2 == -1)
+	{
+		exit_error("Erreur fork pid2");
+	}
+
+	down.sem_num = SEM_UN;
+	semop(sem, &down, 1);
+
+	down.sem_num = SEM_DEUX;
+	semop(sem, &down, 1);
+
+	display_msg("Process 3");
+
+	// while (waitpid(-1, NULL, WNOHANG) > 0); 
+	waitpid(pid1, NULL, 0);
+	waitpid(pid2, NULL, 0);
+
+	if ( semctl(sem, SEM_UN, IPC_RMID) == -1)
+		exit_error("Delete set sem");
 
 	exit(EXIT_SUCCESS);
 }

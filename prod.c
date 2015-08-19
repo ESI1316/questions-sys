@@ -23,7 +23,7 @@
 typedef struct shared {
 	int head;
 	int queue;
-	char produits[QUANTITY];
+	char products[QUANTITY];
 	int remaining;
 } shared;
 
@@ -32,10 +32,7 @@ typedef struct shared {
  */
 void exit_on(char * message, int status)
 {
-	if (status == EXIT_FAILURE)
-		perror(message);
-	else
-		printf("%s \n", message);
+	fprintf((status == EXIT_FAILURE ? stderr : stdout), "%s \n", message);
 
 	exit(status);
 }
@@ -131,13 +128,13 @@ int main()
 	shared * data = NULL; 	// Zone mémoire partagée.
 
 	/**
-	 * - Création d'un set de deux sémaphores
+	 * - Création d'un set de trois sémaphores
 	 * - Initialisation du premier sémaphore appellé SEM_PROD avec QUANTITY
 	 *   ressources disponibles.
 	 * - Initialisation du second sémaphore appellé SEM_CONS avec 0 ressources
 	 *   disponibles.
+	 * - Initialisation du troisième sémaphore permettant l'exclusivité.
 	 */
-	//if ((semSet = semget(IPC_PRIVATE, 2, IPC_CREAT | 0666)) == -1)
 	if ((semSet = semget(IPC_PRIVATE, 3, IPC_CREAT | 0666)) == -1)
 		exit_error("semget error");
 	if (semctl(semSet, SEM_PROD, SETVAL, QUANTITY) == -1)
@@ -159,7 +156,7 @@ int main()
 	// Initialisation de la structure partagée
 	data->head 	= 0; 
 	data->queue = 0;
-	data->produits[data->head] = '\0';
+	data->products[data->head] = '\0';
 	data->remaining = 10;
 
 	if(fork() == 0)
@@ -171,7 +168,7 @@ int main()
 			if (data->remaining > 0)
 			{
 				down_consommable(semSet); // Y a t il au moins un consommable ?
-				printf("Fils %d : Char : %c \n",getpid(), data->produits[data->head]);
+				printf("Fils %d : Char : %c \n",getpid(), data->products[data->head]);
 				data->head = (data->head+ 1) % QUANTITY;
 				data->remaining--;
 				up_empty(semSet); // Y'a une case vide en plus maintenant.
@@ -199,7 +196,7 @@ int main()
 			if (data->remaining > 0)
 			{
 				down_consommable(semSet); // Y a t il au moins un consommable ?
-				printf("Fils %d : Char : %c \n",getpid(), data->produits[data->head]);
+				printf("Fils %d : Char : %c \n",getpid(), data->products[data->head]);
 				data->head = (data->head+ 1) % QUANTITY;
 				data->remaining--;
 				up_empty(semSet); // Y'a une case vide en plus maintenant.
@@ -222,7 +219,7 @@ int main()
 	for(int i = 0; i < QUANTITY; i++)
 	{
 		down_empty(semSet); // Y a  t il une case vide à remplir ? 
-		data->produits[data->queue] = 'a' + i;
+		data->products[data->queue] = 'a' + i;
 		data->queue = (data->queue + 1) % QUANTITY;
 		up_consommable(semSet); // Voila c'est rempli !
 		sleep(1);
