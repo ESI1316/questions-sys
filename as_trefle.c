@@ -122,10 +122,13 @@ int main()
 {
 	char line[BUFFER_S + 1];
 	char * tokens[TOKENS_S];
+
+	/*
 	struct sigaction action;
 
 	action.sa_handler = kill_children;
 	sigaction(SIGCHLD, &action, NULL);
+	*/
 
 	prompt(line);
 
@@ -172,11 +175,11 @@ int main()
 				if(execvp(tokens[0], tokens) == -1)
 					exit_error("Invalid command");
 			}
+
+			wait(NULL); // Tuer via le sigchild provoque des erreurs.
 		}
 
-		wait(NULL);
-
-		for (int j = 0; i < TOKENS_S; i++) tokens[j] = NULL;
+		for (int j = 0; j < i; j++) tokens[j] = NULL;
 		prompt(line);
 	}
 
