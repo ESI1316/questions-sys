@@ -22,8 +22,8 @@ int main()
     struct sockaddr_in sockstr;
     struct in_addr adresse;
 
-    sock = socket(PF_INET,SOCK_STREAM,0);
-    if(sock == -1)
+    sock = socket(PF_INET, SOCK_STREAM, 0);
+    if(sock < 0)
         exitOnError("Socket() client : Nok \n");
     else
         fprintf(stdout, "Socket() client : ok \n");
@@ -35,13 +35,13 @@ int main()
         exitOnError("inet_aton() client : Nok \n");
     else
         fprintf(stdout, "inet_aton() client : ok \n");
-
     sockstr.sin_addr = adresse;
 
     if(connect(sock, (struct sockaddr *) &sockstr, sizeof(sockstr)) == -1)
         exitOnError("connect() client : Nok \n");
     else
         fprintf(stdout, "connect() client : ok \n");
+
     if (write(sock , message, sizeof(message)) < 0)
         exitOnError("write() client : Nok \n");
     else
