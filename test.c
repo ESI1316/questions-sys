@@ -60,5 +60,6 @@ int main()
 	}
 
 	shmdt(i);
+	shmctl(memid, IPC_RMID, NULL);
 	return 0;
 }
