@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "Demo d'une demo"
+echo "Appuyez sur enter"
+read
+
+echo "Lanchement de ./as_trefle ?"
+read
+./as_trefle
+
+echo "En vous remerciant"
