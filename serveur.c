@@ -1,68 +1,46 @@
+#define _BSD_SOURCE
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+
+void exitOnError(const char * message)
+{
+    fprintf(stderr,"%s \n", message);
+    exit(EXIT_FAILURE);
+}
 
 int main()
 {
-	int sock;
-	struct sockaddr_in server;
-	int mySock;
-	char buffer[1024];
-	int rval;
+    int sock,h,n;
+    char buf[255] = "";
+    struct sockaddr_in bd;
 
-	sock = socket(AF_INET, SOCK_STREAM, 0);
+    sock = socket(PF_INET, SOCK_STREAM, 0);
 
-	if (sock < 0)
-	{
-		fprintf(stderr, "Erreur création de socket");
-		exit(EXIT_FAILURE);
-	}
+    bd.sin_family = AF_INET;
+    bd.sin_port = htons(5990);
+    inet_aton("127.0.0.1", (struct in_addr *) &bd.sin_addr.s_addr);
 
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = INADDR_ANY;
-	server.sin_port = htons(5500);
+    bind(sock, (struct sockaddr *) &bd, sizeof(bd));
+    listen(sock,1);
 
-	if(bind(sock, (struct sockaddr *) &server, sizeof(server)) == -1)
-	{
-		fprintf(stderr, "Erreur bind de socket");
-		exit(EXIT_FAILURE);
-	}
+    h = accept(sock,NULL, NULL);
 
-	if(listen(sock, 5) == -1)
-	{
-		fprintf(stderr, "Erreur listen de socket");
-		exit(EXIT_FAILURE);
-	}
+	if (h < 0)
+		exitOnError("accept() serveur : Nok \n");
+	else
+		fprintf(stdout, "accept() serveur : ok \n");
 
-	for(;;)
-	{
-		mySock = accept(sock, (struct sockaddr *) 0, 0);
+    n = read(h,&buf,sizeof(buf));
+    printf("Recu %d charactères : %s \n",n, buf);
 
-		if (mySock == -1)
-		{
-			fprintf(stderr, "Erreur listen de socket");
-			exit(EXIT_FAILURE);
-		}
+    close(sock);
+	close(h);
 
-		memset(buffer, 0, sizeof(buffer));
-		if (rval = recv(mySock, buffer, sizeof(buffer), 0) < 0)
-		{
-			fprintf(stderr, "Erreur reception de socket");
-			exit(EXIT_FAILURE);
-		}
-		else if (rval == 0)
-			fprintf(stdout, "End of connexion");
-		else
-			fprintf(stdout, "Message %s", buffer);
-
-		fprintf(stdout, "Message reçu (rval = %d)", rval);
-		close(mySock);
-	}
-
-	return 0;
+    exit(0);
 }
-
