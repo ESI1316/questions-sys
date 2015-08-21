@@ -6,7 +6,6 @@ ALL=as_trefle fork_boucle ls_wc process prod test client serveur shell_ls
 
 all : Demo $(ALL)
 	@clear
-	@./Demo
 
 as_trefle : as_trefle.o
 	$(CC) $(LFLAGS) $^ -o $@

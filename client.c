@@ -22,7 +22,7 @@ int main()
     struct sockaddr_in sockstr;
     struct in_addr adresse;
 
-    sock = socket(PF_INET, SOCK_STREAM, 0);
+    sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock < 0)
         exitOnError("Socket() client : Nok \n");
     else
@@ -48,5 +48,5 @@ int main()
         fprintf(stdout, "write() client : ok \n");
 
     close(sock);
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
