@@ -8,13 +8,6 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <signal.h>
-
-void kill_c(int sig)
-{
-	fprintf(stdout, "SIGCHLD \n");
-	while( waitpid(-1, NULL, WNOHANG) > 0);
-}
 
 void exitOnError(const char * message)
 {
@@ -24,10 +17,6 @@ void exitOnError(const char * message)
 
 int main()
 {
-	struct sigaction action;
-	action.sa_handler = kill_c;
-	sigaction(SIGCHLD, &action, NULL);
-
 	int sock;
 	int handle;
 	int count;
