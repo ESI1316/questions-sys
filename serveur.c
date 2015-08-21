@@ -8,6 +8,12 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <signal.h>
+
+void handler_kill(int sig)
+{
+	waitpid(-1, NULL, WNOHANG);
+}
 
 void exitOnError(const char * message)
 {
@@ -17,6 +23,8 @@ void exitOnError(const char * message)
 
 int main()
 {
+	signal(SIGCHLD, handler_kill);
+
 	int sock;
 	int handle;
 	int count;
@@ -57,16 +65,16 @@ int main()
 		  */
 		if (fork() == 0)
 		{
+			close(sock);
 			count = read(handle, &buf, sizeof(buf));
 			printf("Recu %d charactères : %s \n",count, buf);
-			close(sock);
 			close(handle);
 			exit(EXIT_SUCCESS);
 		}
 
+		close(handle);
 	}
 	close(sock);
-	close(handle);
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 
 
