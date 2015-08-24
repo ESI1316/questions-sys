@@ -28,8 +28,8 @@ int main()
 	 *
 	 * Utilisation optimale :
 	 *
-	 * waitpid(pid, NULL, NULL); attend le process pid (retourné par fork())
-	 * waitpid(-1, NULL, NULL); attend n'importe quel fils
+	 * waitpid(pid, NULL, 0); attend le process pid (retourné par fork())
+	 * waitpid(-1, NULL, 0); attend n'importe quel fils
 	 * waitpid(-1, NULL, WNOHANG); fait une tentative d'attende de fils, il n'y
 	 * en a pas au moins un de terminé, le programme continue sinon il retourne
 	 * un nombre positif.

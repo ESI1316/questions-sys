@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS= -std=c99 -pedantic-errors
 LFLAGS=
 NOLINK= -c
-ALL=as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd
+ALL=as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd PRe
 
 all : Demo $(ALL)
 	@clear
@@ -14,6 +14,8 @@ PRb : PRb.o
 PRc : PRc.o
 	$(CC) $(LFLAGS) $^ -o $@ 
 PRd : PRd.o
+	$(CC) $(LFLAGS) $^ -o $@ 
+PRe : PRe.o
 	$(CC) $(LFLAGS) $^ -o $@ 
 as_trefle : as_trefle.o
 	$(CC) $(LFLAGS) $^ -o $@
