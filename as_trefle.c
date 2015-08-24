@@ -72,6 +72,13 @@ void function_signal(int sig_num)
 		}
 
 		wait(NULL);
+		signal(sig_num, function_signal);
+		/* Contrairement  aux  systèmes  BSD,  les signaux sous Linux
+		 reprennent  leurs  comportements  par  défaut  après  leur
+		 première réception. Il est donc généralement nécessaire de
+		 réarmer le gestionnaire (par un nouvel appel à signal ) 
+		  au sein même du gestionnaire.
+		 */
 	}
 }
 
