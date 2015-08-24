@@ -1,4 +1,5 @@
 #define _BSD_SOURCE
+#define _XOPEN_SOURCE
 
 #include <stdio.h>
 #include <wait.h>
@@ -9,6 +10,12 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <signal.h>
+
+void handler_int(int sig)
+{
+	fprintf(stdout, "Vous avez quittez le serveur. \n");
+	exit(EXIT_SUCCESS);
+}
 
 void handler_kill(int sig)
 {
@@ -23,6 +30,7 @@ void exitOnError(const char * message)
 
 int main()
 {
+	signal(SIGINT, handler_int);
 	signal(SIGCHLD, handler_kill);
 
 	int sock;
@@ -42,8 +50,10 @@ int main()
 	server.sin_port = htons(5990);
 
 	//inet_aton("127.0.0.1", (struct in_addr *) &server.sin_addr.s_addr);
-	// INADDR_ANY sera toujours l'adresse sur lequel le serveur tourne. 
-	// Pas besoin de inet_aton
+	// Lorsqu'on indique INADDR_ANY lors de l'attachement, la socket sera
+	// affectée à toutes les interfaces locales. Si on invoque listen(2) ou
+	// connect(2) sur une socket non affectée, elle est automatiquement attachée
+	// à un port libre aléatoire, avec l'adresse locale fixée sur INADDR_ANY. 
 	server.sin_addr.s_addr = INADDR_ANY;
 
 	if (bind(sock, (struct sockaddr *) &server, sizeof(server)) < 0)
@@ -58,11 +68,6 @@ int main()
 
 	while((handle = accept(sock, NULL, NULL)) >= 0)
 	{
-		/*if (handle < 0)
-		  exitOnError("accept() serveur : Nok \n");
-		  else
-		  fprintf(stdout, "accept() serveur : ok \n");
-		  */
 		if (fork() == 0)
 		{
 			close(sock);
@@ -74,9 +79,7 @@ int main()
 
 		close(handle);
 	}
+
 	close(sock);
-	while(waitpid(-1, NULL, WNOHANG) > 0);
-
-
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
