@@ -2,15 +2,19 @@ CC=gcc
 CFLAGS= -std=c99 -pedantic-errors
 LFLAGS=
 NOLINK= -c
-ALL=as_trefle fork_boucle ls_wc process prod test client serveur shell_ls
+ALL=as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb
 
 all : Demo $(ALL)
 	@clear
 
+PRa : PRa.o
+	$(CC) $(LFLAGS) $^ -o $@
+PRb : PRb.o
+	$(CC) $(LFLAGS) $^ -o $@
+PRc : PRc.o
+	$(CC) $(LFLAGS) $^ -o $@ 
 as_trefle : as_trefle.o
 	$(CC) $(LFLAGS) $^ -o $@
-fork_boucle : fork_boucle.o
-	$(CC) $(LFLAGS) $^ -o $@ 
 ls_wc : ls_wc.o
 	$(CC) $(LFLAGS) $^ -o $@ 
 process : process.o

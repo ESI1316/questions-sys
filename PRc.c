@@ -1,8 +1,10 @@
+/* Exercice PRc page 4 */
 #define _XOPEN_SOURCE
 
 #include <stdio.h>
 #include <wait.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
@@ -43,5 +45,6 @@ int main()
 	}
 
 	shmdt(i);
-	return 0;
+	// semctl(semid, 0, IPC_RMID); // Erreur si détruit avant la fin
+	exit(EXIT_SUCCESS);
 }
