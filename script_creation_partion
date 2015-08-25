@@ -1,3 +1,30 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "jcjmba" | sudo -S mkfs.ext4 /dev/sdc1
+ROOTPASSWORD=""
+DEFAULTPW="jcjmba"
+FS=""
+DEFAULTFS="ext4"
+DEVICE=""
+DEFAULTDEVICE="sdc1"
+
+read -p "Mot de passe root de la machine [default = jcjmba] : " -r ROOTPASSWORD
+
+if [ -z "$ROOTPASSWORD" ]; then
+	ROOTPASSWORD="$DEFAULTPW"
+fi
+
+read -p "Type de filesystem [default = ext4] : " -r FS
+
+if [ -z "$FS" ]; then
+	FS="$DEFAULTFS"
+fi
+
+ls /dev/sd*
+
+read -p "Device à formater [default = sdc1] : " -r DEVICE
+
+if [ -z "$DEVICE" ]; then
+	FS="$DEFAULTDEVICE"
+fi
+
+echo $ROOTPASSWORD | sudo -S mkfs.$FS /dev/$DEVICE
