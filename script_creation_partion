@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "jcjmba" | sudo -S mkfs.ext4 /dev/sdc1
