@@ -83,9 +83,7 @@ int main()
 		}
 		else if (tokens[0] != NULL)
 		{
-			int pid = fork();
-
-			if (pid == 0)
+			if (fork() == 0)
 			{
 				if (execvp(tokens[0], tokens) == -1)
 					exit_error("Commande invalide");
@@ -93,7 +91,7 @@ int main()
 				exit(EXIT_SUCCESS);
 			}
 
-			waitpid(pid, NULL, 0);
+			waitpid(-1, NULL, 0);
 		}
 
 		prompt(buffer);

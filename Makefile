@@ -2,11 +2,13 @@ CC=gcc
 CFLAGS= -std=c99 -pedantic-errors
 LFLAGS=
 NOLINK= -c
-ALL=as_coeur as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd PRe
+ALL=as_coeur as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd PRe blake_carreau
 
 all : Demo $(ALL)
 	@clear
 
+blake_carreau : blake_carreau.o
+	$(CC) $(LFLAGS) $^ -o $@
 as_coeur : as_coeur.o
 	$(CC) $(LFLAGS) $^ -o $@
 PRa : PRa.o
