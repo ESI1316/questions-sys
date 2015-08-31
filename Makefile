@@ -2,11 +2,17 @@ CC=gcc
 CFLAGS= -std=c99 -pedantic-errors
 LFLAGS=
 NOLINK= -c
-ALL=as_coeur as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd PRe blake_carreau
+ALL=as_coeur as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd PRe blake_carreau double_open echo_cat utilities
 
 all : Demo $(ALL)
 	@clear
 
+double_open : double_open.o
+	$(CC) $(LFLAGS) $^ -o $@
+echo_chat : echo_chat.o
+	$(CC) $(LFLAGS) $^ -o $@
+utilities : utilities.o
+	$(CC) $(LFLAGS) $^ -o $@
 blake_carreau : blake_carreau.o
 	$(CC) $(LFLAGS) $^ -o $@
 as_coeur : as_coeur.o

@@ -19,6 +19,7 @@ void handler_int(int sig)
 
 void handler_kill(int sig)
 {
+	fprintf(stdout, "Mort du sous-serveur. \n");
 	waitpid(-1, NULL, WNOHANG);
 }
 

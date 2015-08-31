@@ -52,7 +52,7 @@ void exit_error(char * message)
  */
 void kill_children(int sig)
 {
-	while (waitpid(-1, NULL, WNOHANG) > 0);
+	waitpid(-1, NULL, WNOHANG);
 }
 
 /**
@@ -71,7 +71,7 @@ void function_signal(int sig_num)
 				exit_error("Erreur d'exec");
 		}
 
-		wait(NULL);
+		waitpid(-1, NULL, 0);
 		signal(sig_num, function_signal);
 		/* Contrairement  aux  systèmes  BSD,  les signaux sous Linux
 		 reprennent  leurs  comportements  par  défaut  après  leur
@@ -121,7 +121,16 @@ int tokenize(char ** tokens, char * line, char * delimiter)
 
 void prompt(char * buffer)
 {
-	printf("SHELL $ ");
+	char * path = getcwd(NULL, 0);
+
+	if (path != NULL)
+	{
+		printf("%s $ ", path);
+		free(path);
+	}
+	else
+		printf("SHELL $ ");
+
 	fgets(buffer, BUFFER_S, stdin);
 }
 
