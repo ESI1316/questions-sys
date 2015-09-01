@@ -2,51 +2,59 @@ CC=gcc
 CFLAGS= -std=c99 -pedantic-errors
 LFLAGS=
 NOLINK= -c
-ALL=as_coeur as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd PRe blake_carreau double_open echo_cat utilities
+OBJETDIR=objets/
+EXECDIR=builds/
+ALL=as_coeur as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd PRe blake_carreau double_open echo_cat utilities nosa_carreau
 
-all : Demo $(ALL)
+all : Demo $(OBJETDIR) $(ALL)
 	@clear
 
-double_open : double_open.o
+$(OBJETDIR) : 
+	@mkdir $(OBJETDIR)
+
+double_open : $(OBJETDIR)double_open.o
 	$(CC) $(LFLAGS) $^ -o $@
-echo_chat : echo_chat.o
+echo_chat : $(OBJETDIR)echo_chat.o
 	$(CC) $(LFLAGS) $^ -o $@
-utilities : utilities.o
+utilities : $(OBJETDIR)utilities.o
 	$(CC) $(LFLAGS) $^ -o $@
-blake_carreau : blake_carreau.o
+blake_carreau : $(OBJETDIR)blake_carreau.o
 	$(CC) $(LFLAGS) $^ -o $@
-as_coeur : as_coeur.o
+nosa_carreau : $(OBJETDIR)nosa_carreau.o
 	$(CC) $(LFLAGS) $^ -o $@
-PRa : PRa.o
+as_coeur : $(OBJETDIR)as_coeur.o
 	$(CC) $(LFLAGS) $^ -o $@
-PRb : PRb.o
+PRa : $(OBJETDIR)PRa.o
 	$(CC) $(LFLAGS) $^ -o $@
-PRc : PRc.o
-	$(CC) $(LFLAGS) $^ -o $@ 
-PRd : PRd.o
-	$(CC) $(LFLAGS) $^ -o $@ 
-PRe : PRe.o
-	$(CC) $(LFLAGS) $^ -o $@ 
-as_trefle : as_trefle.o
+PRb : $(OBJETDIR)PRb.o
 	$(CC) $(LFLAGS) $^ -o $@
-ls_wc : ls_wc.o
+PRc : $(OBJETDIR)PRc.o
 	$(CC) $(LFLAGS) $^ -o $@ 
-process : process.o
+PRd : $(OBJETDIR)PRd.o
 	$(CC) $(LFLAGS) $^ -o $@ 
-prod : prod.o
+PRe : $(OBJETDIR)PRe.o
 	$(CC) $(LFLAGS) $^ -o $@ 
-test : test.o
+as_trefle : $(OBJETDIR)as_trefle.o
+	$(CC) $(LFLAGS) $^ -o $@
+ls_wc : $(OBJETDIR)ls_wc.o
 	$(CC) $(LFLAGS) $^ -o $@ 
-client : client.o
+process : $(OBJETDIR)process.o
 	$(CC) $(LFLAGS) $^ -o $@ 
-serveur : serveur.o
+prod : $(OBJETDIR)prod.o
 	$(CC) $(LFLAGS) $^ -o $@ 
-shell_ls : shell_ls.o
+test : $(OBJETDIR)test.o
+	$(CC) $(LFLAGS) $^ -o $@ 
+client : $(OBJETDIR)client.o
+	$(CC) $(LFLAGS) $^ -o $@ 
+serveur : $(OBJETDIR)serveur.o
+	$(CC) $(LFLAGS) $^ -o $@ 
+shell_ls : $(OBJETDIR)shell_ls.o
 	$(CC) $(LFLAGS) $^ -o $@ 
 
-%.o : %.c 
+$(OBJETDIR)%.o : %.c 
 	$(CC) $(CFLAGS) $(NOLINK) $^ -o $@
 
 clean :
-	@rm -rf *.o
+	@rm -rf $(OBJETDIR)/*.o
+	@rmdir $(OBJETDIR)
 	@rm -rf $(ALL)
