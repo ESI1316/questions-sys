@@ -4,7 +4,7 @@ LFLAGS=
 NOLINK= -c
 OBJETDIR=objets/
 EXECDIR=builds/
-ALL=as_coeur as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd PRe blake_carreau double_open echo_cat utilities nosa_carreau
+ALL=as_coeur as_trefle PRc ls_wc process prod test client serveur shell_ls PRa PRb PRc PRd PRe blake_carreau double_open echo_cat utilities nosa_carreau alarm_t interbloc ls_file huit_coeur
 
 all : Demo $(OBJETDIR) $(ALL)
 	@clear
@@ -12,6 +12,12 @@ all : Demo $(OBJETDIR) $(ALL)
 $(OBJETDIR) : 
 	@mkdir $(OBJETDIR)
 
+huit_coeur : $(OBJETDIR)huit_coeur.o
+	$(CC) $(LFLAGS) $^ -o $@
+alarm_t : $(OBJETDIR)alarm_t.o
+	$(CC) $(LFLAGS) $^ -o $@
+interbloc : $(OBJETDIR)interbloc.o
+	$(CC) $(LFLAGS) $^ -o $@
 double_open : $(OBJETDIR)double_open.o
 	$(CC) $(LFLAGS) $^ -o $@
 echo_chat : $(OBJETDIR)echo_chat.o

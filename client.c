@@ -32,18 +32,20 @@ int main()
     sockstr.sin_family = AF_INET;
     sockstr.sin_port = htons(5990);
 
-	if(inet_aton("127.0.0.1", &adresse) == 0)
-        exitOnError("inet_aton() client : Nok \n");
-    else
-        fprintf(stdout, "inet_aton() client : ok \n");
-    sockstr.sin_addr = adresse;
+//	if(inet_aton("127.0.0.1", &adresse) == 0)
+//        exitOnError("inet_aton() client : Nok \n");
+//    else
+//        fprintf(stdout, "inet_aton() client : ok \n");
+    //sockstr.sin_addr = adresse;
+	sockstr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	/* inet_addr is deprecated, please use inet_aton */
 
     if(connect(sock, (struct sockaddr *) &sockstr, sizeof(sockstr)) == -1)
         exitOnError("connect() client : Nok \n");
     else
         fprintf(stdout, "connect() client : ok \n");
 
-    if (write(sock , message, sizeof(message)) < 0)
+    if (write(sock , message, strlen(message)) < 0)
         exitOnError("write() client : Nok \n");
     else
         fprintf(stdout, "write() client : ok \n");
